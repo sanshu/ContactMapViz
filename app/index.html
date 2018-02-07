@@ -1,0 +1,348 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <!-- @author Mayya Sedova <msedova.dev@gmail.com> -->
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>ContactMapViz</title>
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        <!-- build:css styles/vendor.css -->
+        <!-- bower:css -->
+        <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.css" />
+        <!-- endbower -->
+        <!-- endbuild -->
+
+        <!-- build:css styles/main.css -->
+        <link rel="stylesheet" href="styles/main.css">
+        <!-- endbuild -->
+
+        <!-- build:js scripts/vendor/modernizr.js -->
+        <script src="/bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="/bower_components/modernizr/modernizr.js"></script>
+        <!-- endbuild -->
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <style>
+            /* disable text selection */
+            svg *::selection {
+                background : transparent;
+            }
+
+            svg *::-moz-selection {
+                background:transparent;
+            } 
+
+            svg *::-webkit-selection {
+                background:transparent;
+            }
+/*            
+            svg {
+                border: 1px solid black;
+            }*/
+            rect.selection {
+                stroke          : #333;
+                stroke-dasharray: 4px;
+                stroke-opacity  : 0.5;
+                fill            : transparent;
+            }
+
+            rect.cell-border {
+                stroke: #eee;
+                stroke-width:0.3px;   
+            }
+
+            rect.cell-selected {
+                stroke: rgb(51,102,153);
+                stroke-width:0.5px;   
+            }
+
+            rect.cell-hover {
+                stroke: #F00;
+                stroke-width:0.3px;   
+            }
+
+            text.mono {
+                font-size: 9pt;
+                font-family: Consolas, courier;
+                fill: #aaa;
+            }
+
+            text.text-selected {
+                fill: #000;
+            }
+
+            text.text-highlight {
+                fill: #c00;
+            }
+            text.text-hover {
+                fill: #00C;
+            }
+        </style>
+
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+
+        <script>
+            d3.queue()
+                .defer(d3.text, "./data/3kkmA_CM_matrix.csv")
+                .defer(d3.text, "./data/4efmA_CM_matrix.csv")
+                .await(draw);
+
+            function arrayToObject(dataarray) {
+                var data = [];
+                var rows = d3.csvParseRows(dataarray);
+                rows.forEach(function (r, i) {
+                    r.forEach(function (v, j) {
+                        if (v > 0) {
+                            // remember only non-zero values
+                            data.push({
+                                row: +i,
+                                col: +j,
+                                value: +v
+                            });
+                        }
+                    });
+                });
+                return {rows: rows.length, cols: rows[0].length, matrix: data};
+            }
+
+            function arrayCombineToObject(arr1, arr2) {
+                var data = [];
+                var rows1 = d3.csvParseRows(arr1),
+                    rows2 = d3.csvParseRows(arr2);
+
+                rows1.forEach(function (r, i) {
+                    r.forEach(function (v, j) {
+                        var total = +v - rows2[i][j];
+                        if (total != 0) {
+                            // remember only non-zero values
+                            data.push({
+                                row: +i,
+                                col: +j,
+                                value: +total
+                            });
+                        }
+                    });
+                });
+                return {rows: rows1.length, cols: rows1[0].length, matrix: data};
+            }
+
+
+            function drawTextData() {
+                $("#alertbox").hide();
+                var first = $("#textCMfirst").val();
+                var second = $("#textCMsecond").val();
+                $("svg").remove();
+                draw("", first, second);
+            }
+
+            function showAlert(text) {
+                $("#alertbox").html(text);
+                $("#alertbox").show();
+            }
+
+            function draw(error, datafirst, datasecond) {
+                var data1 = arrayToObject(datafirst);
+                console.log(data1);
+                
+                var data2 = arrayToObject(datasecond);
+                console.log(data2);
+
+                var datasum = arrayCombineToObject(datafirst, datasecond);
+                console.log(datasum);
+
+                var width = 900;
+
+                var cols = Math.max(data1.cols, data2.cols),
+                    rows = Math.max(data1.rows, data2.rows);
+
+                var margin = {top: 50, right: 10, bottom: 50, left: 50},
+                    cellSize = Math.max(1, Math.floor((width - margin.left - margin.right) / cols)),
+                    height = cellSize * rows;
+                console.log(cellSize);
+
+                var svg = d3.select("#contactMaps").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                    ;
+
+                var heatMap1 = svg.append("g").attr("class", "g3").attr("id", "cmap1")
+                    .selectAll(".cellg")
+                    .data(data1.matrix, function (d) {
+                        return d.row + ":" + d.col;
+                    })
+                    .enter()
+                    .append("rect")
+                    .attr("x", function (d) {
+                        return d.col * cellSize;
+                    })
+                    .attr("y", function (d) {
+                        return d.row * cellSize;
+                    })
+                    .attr("class", function (d) {
+                        return "cell cell-border cr" + (d.row - 1) + " cc" + (d.col - 1);
+                    })
+                    .attr("width", cellSize)
+                    .attr("height", cellSize)
+
+                    .style("opacity", 0.7)
+                    .style("fill", function (d) {
+                        return '#007bff';
+                    });
+
+                var heatMap2 = svg.append("g").attr("class", "g3").attr("id", "cmap2")
+                    .selectAll(".cellg")
+                    .data(data2.matrix, function (d) {
+                        return d.row + ":" + d.col;
+                    })
+                    .enter()
+                    .append("rect")
+                    .attr("x", function (d) {
+                        return d.col * cellSize;
+                    })
+                    .attr("y", function (d) {
+                        return d.row * cellSize;
+                    })
+                    .attr("class", function (d) {
+                        return "cell cell-border cr" + (d.row - 1) + " cc" + (d.col - 1);
+                    })
+                    .attr("width", cellSize)
+                    .attr("height", cellSize)
+                    .style("opacity", 0.7)
+                    .style("fill", function (d) {
+                        return '#ffc107';
+                    });
+
+                var heatMapsum = svg.append("g").attr("class", "g3").attr("id", "cmapsum")
+                    .selectAll(".cellg")
+                    .data(datasum.matrix, function (d) {
+                        return d.row + ":" + d.col;
+                    })
+                    .enter()
+                    .append("rect")
+                    .attr("x", function (d) {
+                        return d.col * cellSize;
+                    })
+                    .attr("y", function (d) {
+                        return d.row * cellSize;
+                    })
+                    .attr("class", function (d) {
+                        return "cell cell-border cr" + (d.row - 1) + " cc" + (d.col - 1);
+                    })
+                    .attr("width", cellSize)
+                    .attr("height", cellSize)
+
+                    .style("fill", function (d) {
+                        return  (d.value > 0) ? '#D50000' : '#28a745';
+                    });
+            }
+
+            function toggle(id) {
+                $('#' + id).fadeToggle();
+            }
+        </script>
+    </head>
+    <body>
+        <!--[if IE]>
+          <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+        <div class="container">
+            <div class="header">                
+                <h3 class="text-muted">ContactMapViz</h3>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+
+                    <div class="card">
+                        <div class="card-header" id="headingOne">
+                            <h5 class="mb-0">
+                                Enter data
+                            </h5>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row">                               
+                                <div class="col-sm-5">
+                                    <label for="textCMfirst">First contact map data</label>
+                                    <textarea class="form-control" id="textCMfirst" rows="15"></textarea>
+                                </div>
+                                <div class="col-sm-5">
+                                    <label for="textCMsecond">Second contact map data</label>
+                                    <textarea class="form-control" id="textCMsecond" rows="15"></textarea>
+                                </div>
+                                <div class="col-sm-2">
+                                    <button type="button" class="btn btn-secondary" onclick="drawTextData()">Load</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-danger" role="alert" id="alertbox" hidden="hidden">
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="row marketing">
+                <div class="col-lg-12">
+                    <button type="button" class="btn btn-outline-primary active" data-toggle="button" onclick="toggle('cmap1')">First</button>
+                    <button type="button" class="btn btn-outline-warning active" data-toggle="button" onclick="toggle('cmap2')">Second</button>
+                    <button type="button" class="btn btn-outline-danger active" data-toggle="button" onclick="toggle('cmapsum')">Difference</button>
+                </div>
+                <div class="col-lg-12">
+                    <div id="contactMaps"></div>
+                </div>
+
+            </div>
+
+            <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+            <script>
+                (function (b, o, i, l, e, r) {
+                    b.GoogleAnalyticsObject = l;
+                    b[l] || (b[l] =
+                        function () {
+                            (b[l].q = b[l].q || []).push(arguments)
+                        });
+                    b[l].l = +new Date;
+                    e = o.createElement(i);
+                    r = o.getElementsByTagName(i)[0];
+                    e.src = 'https://www.google-analytics.com/analytics.js';
+                    r.parentNode.insertBefore(e, r)
+                }(window, document, 'script', 'ga'));
+                ga('create', 'UA-XXXXX-X');
+                ga('send', 'pageview');
+            </script>
+
+            <!-- build:js scripts/vendor.js -->
+            <!-- bower:js -->
+            <script src="/bower_components/jquery/dist/jquery.js"></script>
+            <script src="/bower_components/modernizr/modernizr.js"></script>
+            <!-- endbower -->
+            <!-- endbuild -->
+
+            <!-- build:js scripts/plugins.js -->
+            <script src="/bower_components/bootstrap/js/affix.js"></script>
+            <script src="/bower_components/bootstrap/js/alert.js"></script>
+            <script src="/bower_components/bootstrap/js/dropdown.js"></script>
+            <script src="/bower_components/bootstrap/js/tooltip.js"></script>
+            <script src="/bower_components/bootstrap/js/modal.js"></script>
+            <script src="/bower_components/bootstrap/js/transition.js"></script>
+            <script src="/bower_components/bootstrap/js/button.js"></script>
+            <script src="/bower_components/bootstrap/js/popover.js"></script>
+            <script src="/bower_components/bootstrap/js/carousel.js"></script>
+            <script src="/bower_components/bootstrap/js/scrollspy.js"></script>
+            <script src="/bower_components/bootstrap/js/collapse.js"></script>
+            <script src="/bower_components/bootstrap/js/tab.js"></script>
+            <!-- endbuild -->
+
+            <!-- build:js scripts/main.js -->
+            <script src="scripts/main.js"></script>
+            <!-- endbuild -->
+    </body>
+</html>
