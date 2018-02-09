@@ -40,10 +40,7 @@
             svg *::-webkit-selection {
                 background:transparent;
             }
-/*            
-            svg {
-                border: 1px solid black;
-            }*/
+
             rect.selection {
                 stroke          : #333;
                 stroke-dasharray: 4px;
@@ -82,14 +79,42 @@
             text.text-hover {
                 fill: #00C;
             }
+
+            #tooltip {
+                position: absolute;
+                width: 200px;
+                height: auto;
+                padding: 10px;
+                background-color: white;
+                -webkit-border-radius: 10px;
+                -moz-border-radius: 10px;
+                border-radius: 10px;
+                -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                pointer-events: none;
+            }
+
+            #tooltip.hidden {
+                display: none;
+            }
+
+            #tooltip p {
+                margin: 0;
+                font-family: sans-serif;
+                font-size: 12px;
+                line-height: 20px;
+            }
         </style>
 
         <script src="https://d3js.org/d3.v4.min.js"></script>
 
         <script>
             d3.queue()
-                .defer(d3.text, "./data/3kkmA_CM_matrix.csv")
-                .defer(d3.text, "./data/4efmA_CM_matrix.csv")
+                .defer(d3.text, "/data/3kkmA_CM_matrix.csv")
+                .defer(d3.text, "/data/4efmA_CM_matrix.csv")
+                .defer(d3.text, "/data/3kkmA.txt")
+                .defer(d3.text, "/data/4efmA.txt")
                 .await(draw);
 
             function arrayToObject(dataarray) {
@@ -136,8 +161,10 @@
                 $("#alertbox").hide();
                 var first = $("#textCMfirst").val();
                 var second = $("#textCMsecond").val();
+                 var firstseq = $("#seqCMfirst").val();
+                var secondseq = $("#seqCMsecond").val();
                 $("svg").remove();
-                draw("", first, second);
+                draw("", first, second, firstseq, secondseq);
             }
 
             function showAlert(text) {
@@ -145,14 +172,69 @@
                 $("#alertbox").show();
             }
 
-            function draw(error, datafirst, datasecond) {
+            function getTooltipText(r, c, sequences) {
+                if (!Array.isArray(sequences) || sequences.length < 2)
+                    return "row:" + r + "  col: " + c;
+                var res1 = sequences[0].split("")[r];
+                var res2 = sequences[0].split("")[c];
+                var res3 = sequences[1].split("")[r];
+                var res4 = sequences[1].split("")[c];
+                return "CM1[" + res1 + r + ":" + res2 + c + "], CM2[" + res3 + r + ":" + res4 + c + "]";
+            }
+
+            function createCMap(data, id, svg, cellSize, colorCallback) {
+                var map = svg.append("g").attr("class", "g3").attr("id", id)
+                    .selectAll(".cellg")
+                    .data(data.matrix, function (d) {
+                        return d.row + ":" + d.col;
+                    })
+                    .enter()
+                    .append("rect")
+                    .attr("x", function (d) {
+                        return d.col * cellSize;
+                    })
+                    .attr("y", function (d) {
+                        return d.row * cellSize;
+                    })
+                    .attr("class", function (d) {
+                        return "cell cell-border cr" + (d.row - 1) + " cc" + (d.col - 1);
+                    })
+                    .attr("width", cellSize)
+                    .attr("height", cellSize)
+
+                    .style("opacity", 0.7)
+                    .style("fill", colorCallback)
+                    .on("mouseover", function (d) {
+                        //Update the tooltip position and value
+                        d3.select("#tooltip")
+                            .style("left", (d3.event.pageX + 10) + "px")
+                            .style("top", (d3.event.pageY - 10) + "px")
+                            .select("#value")
+                            .text(getTooltipText(d.row, d.col, data.seq));
+                        d3.select("#tooltip").classed("hidden", false);
+                    })
+                    .on("mouseout", function () {
+                        d3.select("#tooltip").classed("hidden", true);
+                    });
+
+                return map;
+            }
+
+            function draw(error, datafirst, datasecond, seqfirst, seqsecond) {
+                var seq = [];
+                seq.push(seqfirst);
+                seq.push(seqsecond);
+
                 var data1 = arrayToObject(datafirst);
+                data1.seq = seq;
                 console.log(data1);
-                
+
                 var data2 = arrayToObject(datasecond);
+                data2.seq = seq;
                 console.log(data2);
 
                 var datasum = arrayCombineToObject(datafirst, datasecond);
+                datasum.seq = seq;
                 console.log(datasum);
 
                 var width = 900;
@@ -172,75 +254,18 @@
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
                     ;
 
-                var heatMap1 = svg.append("g").attr("class", "g3").attr("id", "cmap1")
-                    .selectAll(".cellg")
-                    .data(data1.matrix, function (d) {
-                        return d.row + ":" + d.col;
-                    })
-                    .enter()
-                    .append("rect")
-                    .attr("x", function (d) {
-                        return d.col * cellSize;
-                    })
-                    .attr("y", function (d) {
-                        return d.row * cellSize;
-                    })
-                    .attr("class", function (d) {
-                        return "cell cell-border cr" + (d.row - 1) + " cc" + (d.col - 1);
-                    })
-                    .attr("width", cellSize)
-                    .attr("height", cellSize)
+                var cMap1 = createCMap(data1, 'cmap1', svg, cellSize, function (d) {
+                    return '#007bff';
+                });
 
-                    .style("opacity", 0.7)
-                    .style("fill", function (d) {
-                        return '#007bff';
-                    });
+                var cMap2 = createCMap(data2, 'cmap2', svg, cellSize, function (d) {
+                    return '#ffc107';
+                });
 
-                var heatMap2 = svg.append("g").attr("class", "g3").attr("id", "cmap2")
-                    .selectAll(".cellg")
-                    .data(data2.matrix, function (d) {
-                        return d.row + ":" + d.col;
-                    })
-                    .enter()
-                    .append("rect")
-                    .attr("x", function (d) {
-                        return d.col * cellSize;
-                    })
-                    .attr("y", function (d) {
-                        return d.row * cellSize;
-                    })
-                    .attr("class", function (d) {
-                        return "cell cell-border cr" + (d.row - 1) + " cc" + (d.col - 1);
-                    })
-                    .attr("width", cellSize)
-                    .attr("height", cellSize)
-                    .style("opacity", 0.7)
-                    .style("fill", function (d) {
-                        return '#ffc107';
-                    });
 
-                var heatMapsum = svg.append("g").attr("class", "g3").attr("id", "cmapsum")
-                    .selectAll(".cellg")
-                    .data(datasum.matrix, function (d) {
-                        return d.row + ":" + d.col;
-                    })
-                    .enter()
-                    .append("rect")
-                    .attr("x", function (d) {
-                        return d.col * cellSize;
-                    })
-                    .attr("y", function (d) {
-                        return d.row * cellSize;
-                    })
-                    .attr("class", function (d) {
-                        return "cell cell-border cr" + (d.row - 1) + " cc" + (d.col - 1);
-                    })
-                    .attr("width", cellSize)
-                    .attr("height", cellSize)
-
-                    .style("fill", function (d) {
-                        return  (d.value > 0) ? '#D50000' : '#28a745';
-                    });
+                var cMapsum = createCMap(datasum, 'cmapsum', svg, cellSize, function (d) {
+                    return  (d.value > 0) ? '#D50000' : '#28a745';
+                });
             }
 
             function toggle(id) {
@@ -269,11 +294,14 @@
 
                         <div class="card-body">
                             <div class="row">                               
-                                <div class="col-sm-5">
+                                <div class="col-sm-5">First sequence</label>
+                                    <input class="form-control" id="seqCMfirst" type="text" placeholder="Enter...">
                                     <label for="textCMfirst">First contact map data</label>
                                     <textarea class="form-control" id="textCMfirst" rows="15"></textarea>
                                 </div>
                                 <div class="col-sm-5">
+                                     <label for="seqCMsecond">Second sequence</label>
+                                    <input class="form-control" id="seqCMsecond" type="text" placeholder="Enter...">
                                     <label for="textCMsecond">Second contact map data</label>
                                     <textarea class="form-control" id="textCMsecond" rows="15"></textarea>
                                 </div>
@@ -298,7 +326,9 @@
                 <div class="col-lg-12">
                     <div id="contactMaps"></div>
                 </div>
-
+                <div id="tooltip" class="hidden">
+                    <p><span id="value"></p>
+                </div>
             </div>
 
             <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
