@@ -111,10 +111,10 @@
 
         <script>
             d3.queue()
-                .defer(d3.text, "/data/3kkmA_CM_matrix.csv")
-                .defer(d3.text, "/data/4efmA_CM_matrix.csv")
-                .defer(d3.text, "/data/3kkmA.txt")
-                .defer(d3.text, "/data/4efmA.txt")
+                .defer(d3.text, "./data/3kkmA_CM_matrix.csv")
+                .defer(d3.text, "./data/4efmA_CM_matrix.csv")
+                .defer(d3.text, "./data/3kkmA.txt")
+                .defer(d3.text, "./data/4efmA.txt")
                 .await(draw);
 
             function arrayToObject(dataarray) {
