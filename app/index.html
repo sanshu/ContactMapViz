@@ -161,7 +161,7 @@
                 $("#alertbox").hide();
                 var first = $("#textCMfirst").val();
                 var second = $("#textCMsecond").val();
-                 var firstseq = $("#seqCMfirst").val();
+                var firstseq = $("#seqCMfirst").val();
                 var secondseq = $("#seqCMsecond").val();
                 $("svg").remove();
                 draw("", first, second, firstseq, secondseq);
@@ -237,6 +237,12 @@
                 datasum.seq = seq;
                 console.log(datasum);
 
+
+                $("#textCMfirst").val(datafirst);
+                $("#textCMsecond").val(datasecond);
+                $("#seqCMfirst").val(seqfirst);
+                $("#seqCMsecond").val(seqsecond);
+
                 var width = 900;
 
                 var cols = Math.max(data1.cols, data2.cols),
@@ -300,7 +306,7 @@
                                     <textarea class="form-control" id="textCMfirst" rows="15"></textarea>
                                 </div>
                                 <div class="col-sm-5">
-                                     <label for="seqCMsecond">Second sequence</label>
+                                    <label for="seqCMsecond">Second sequence</label>
                                     <input class="form-control" id="seqCMsecond" type="text" placeholder="Enter...">
                                     <label for="textCMsecond">Second contact map data</label>
                                     <textarea class="form-control" id="textCMsecond" rows="15"></textarea>
