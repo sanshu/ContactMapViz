@@ -151,9 +151,6 @@ ContactMap.prototype._createCMap = function (data, id, svg, cellSize, colorCallb
 }
 
 ContactMap.prototype._getTooltipText = function (r, c) {
-//    return (r);
-//    if (!Array.isArray(sequences) || sequences.length < 2 || sequences[0].length === 0 || sequences[1].length === 0)
-//        return 'row:' + r + '  col: ' + c;
     var res1 = this.data.seq1[r];
     var res2 = this.data.seq1[c];
     var res3 = this.data.seq2[r];
@@ -179,29 +176,32 @@ ContactMap.prototype._draw = function () {
     var data1 = this.data.matrix
         .filter(d => d.structure1.value > 0)
         .map(d => {
-            return{row: d.structure1.row, col: d.structure1.col, value: d.structure1.value, id: d.id};
+            return{row: d.structure1.row, col: d.structure1.col,
+                value: d.structure1.value, id: d.id};
         });
 
     var data2 = this.data.matrix
         .filter(d => d.structure2.value > 0)
         .map(d => {
-            return{row: d.structure2.row, col: d.structure2.col, value: d.structure2.value, id: d.id};
+            return{row: d.structure2.row, col: d.structure2.col,
+                value: d.structure2.value, id: d.id};
         });
 
     var datasum = this.data.matrix
         .filter(d =>
-            d.structure1.value >= 0 ||
-                d.structure2.value >= 0
+            d.structure1.value !=
+                d.structure2.value
         )
         .map(d => {
-            return{row: d.structure2.row, col: d.structure2.col, value: d.structure2.value - d.structure1.value, id: d.id};
+            return{row: d.structure2.row, col: d.structure2.col,
+                value: d.structure2.value - d.structure1.value, id: d.id};
         });
 
     var adjwidth = this._width || 900,
         cols = this.data.max,
         rows = cols,
         margin = {top: 50, right: 20, bottom: 20, left: 50},
-        cellSize = Math.max(3, Math.floor((adjwidth - margin.left - margin.right) / (this.data.max + 1))),
+        cellSize = Math.max(2, Math.floor((adjwidth - margin.left - margin.right) / (this.data.max + 1))),
         width = Math.max(adjwidth, cellSize * cols),
         height = width;
 
