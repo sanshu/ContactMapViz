@@ -26,7 +26,8 @@
         <script src="/bower_components/modernizr/modernizr.js"></script>
         <!-- endbuild -->
 
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+
         <style>
             /* disable text selection */
             svg *::selection {
@@ -105,188 +106,24 @@
                 font-size: 12px;
                 line-height: 20px;
             }
+/*            .axis path {
+    display: none;
+}
+.axis line {
+    stroke-opacity: 0.3;
+    shape-rendering: crispEdges;
+}*/
         </style>
 
         <script src="https://d3js.org/d3.v4.min.js"></script>
 
-        <script>
-            d3.queue()
-                .defer(d3.text, "./data/3kkmA_CM_matrix.csv")
-                .defer(d3.text, "./data/4efmA_CM_matrix.csv")
-                .defer(d3.text, "./data/3kkmA.txt")
-                .defer(d3.text, "./data/4efmA.txt")
-                .await(draw);
-
-            function arrayToObject(dataarray) {
-                var data = [];
-                var rows = d3.csvParseRows(dataarray);
-                rows.forEach(function (r, i) {
-                    r.forEach(function (v, j) {
-                        if (v > 0) {
-                            // remember only non-zero values
-                            data.push({
-                                row: +i,
-                                col: +j,
-                                value: +v
-                            });
-                        }
-                    });
-                });
-                return {rows: rows.length, cols: rows[0].length, matrix: data};
-            }
-
-            function arrayCombineToObject(arr1, arr2) {
-                var data = [];
-                var rows1 = d3.csvParseRows(arr1),
-                    rows2 = d3.csvParseRows(arr2);
-
-                rows1.forEach(function (r, i) {
-                    r.forEach(function (v, j) {
-                        var total = +v - rows2[i][j];
-                        if (total != 0) {
-                            // remember only non-zero values
-                            data.push({
-                                row: +i,
-                                col: +j,
-                                value: +total
-                            });
-                        }
-                    });
-                });
-                return {rows: rows1.length, cols: rows1[0].length, matrix: data};
-            }
-
-
-            function drawTextData() {
-                $("#alertbox").hide();
-                var first = $("#textCMfirst").val();
-                var second = $("#textCMsecond").val();
-                var firstseq = $("#seqCMfirst").val();
-                var secondseq = $("#seqCMsecond").val();
-                $("svg").remove();
-                draw("", first, second, firstseq, secondseq);
-            }
-
-            function showAlert(text) {
-                $("#alertbox").html(text);
-                $("#alertbox").show();
-            }
-
-            function getTooltipText(r, c, sequences) {
-                if (!Array.isArray(sequences) || sequences.length < 2 || sequences[0].length === 0 || sequences[1].length === 0)
-                    return "row:" + r + "  col: " + c;
-                var res1 = sequences[0].split("")[r];
-                var res2 = sequences[0].split("")[c];
-                var res3 = sequences[1].split("")[r];
-                var res4 = sequences[1].split("")[c];
-                r = r + 1;
-                c = c + 1;
-                return "CM1[" + res1 + r + ":" + res2 + c + "], CM2[" + res3 + r + ":" + res4 + c + "]";
-            }
-
-            function createCMap(data, id, svg, cellSize, colorCallback) {
-                var map = svg.append("g").attr("class", "g3").attr("id", id)
-                    .selectAll(".cellg")
-                    .data(data.matrix, function (d) {
-                        return d.row + ":" + d.col;
-                    })
-                    .enter()
-                    .append("rect")
-                    .attr("x", function (d) {
-                        return d.col * cellSize;
-                    })
-                    .attr("y", function (d) {
-                        return d.row * cellSize;
-                    })
-                    .attr("class", function (d) {
-                        return "cell cell-border cr" + (d.row - 1) + " cc" + (d.col - 1);
-                    })
-                    .attr("width", cellSize)
-                    .attr("height", cellSize)
-
-                    .style("opacity", 0.7)
-                    .style("fill", colorCallback)
-                    .on("mouseover", function (d) {
-                        //Update the tooltip position and value
-                        d3.select("#tooltip")
-                            .style("left", (d3.event.pageX + 10) + "px")
-                            .style("top", (d3.event.pageY - 10) + "px")
-                            .select("#value")
-                            .text(getTooltipText(d.row, d.col, data.seq));
-                        d3.select("#tooltip").classed("hidden", false);
-                    })
-                    .on("mouseout", function () {
-                        d3.select("#tooltip").classed("hidden", true);
-                    });
-
-                return map;
-            }
-
-            function draw(error, datafirst, datasecond, seqfirst, seqsecond) {
-                var seq = [];
-                seq.push(seqfirst);
-                seq.push(seqsecond);
-
-                var data1 = arrayToObject(datafirst);
-                data1.seq = seq;
-                console.log(data1);
-
-                var data2 = arrayToObject(datasecond);
-                data2.seq = seq;
-                console.log(data2);
-
-                var datasum = arrayCombineToObject(datafirst, datasecond);
-                datasum.seq = seq;
-                console.log(datasum);
-
-
-                $("#textCMfirst").val(datafirst);
-                $("#textCMsecond").val(datasecond);
-                $("#seqCMfirst").val(seqfirst);
-                $("#seqCMsecond").val(seqsecond);
-
-                var width = 900;
-
-                var cols = Math.max(data1.cols, data2.cols),
-                    rows = Math.max(data1.rows, data2.rows);
-
-                var margin = {top: 50, right: 10, bottom: 50, left: 50},
-                    cellSize = Math.max(1, Math.floor((width - margin.left - margin.right) / cols)),
-                    height = cellSize * rows;
-                console.log(cellSize);
-
-                var svg = d3.select("#contactMaps").append("svg")
-                    .attr("width", width + margin.left + margin.right)
-                    .attr("height", height + margin.top + margin.bottom)
-                    .append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-                    ;
-
-                var cMap1 = createCMap(data1, 'cmap1', svg, cellSize, function (d) {
-                    return '#007bff';
-                });
-
-                var cMap2 = createCMap(data2, 'cmap2', svg, cellSize, function (d) {
-                    return '#ffc107';
-                });
-
-
-                var cMapsum = createCMap(datasum, 'cmapsum', svg, cellSize, function (d) {
-                    return  (d.value > 0) ? '#D50000' : '#28a745';
-                });
-            }
-
-            function toggle(id) {
-                $('#' + id).fadeToggle();
-            }
-        </script>
     </head>
     <body>
         <!--[if IE]>
           <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-        <div class="container">
+        <div class="container" style="max-width:95%">
             <div class="header">                
                 <h3 class="text-muted">ContactMapViz</h3>
             </div>
@@ -299,88 +136,95 @@
                                 Enter data
                             </h5>
                         </div>
-
                         <div class="card-body">
                             <div class="row">                               
-                                <div class="col-sm-5">First sequence</label>
-                                    <input class="form-control" id="seqCMfirst" type="text" placeholder="Enter...">
-                                    <label for="textCMfirst">First contact map data</label>
-                                    <textarea class="form-control" id="textCMfirst" rows="15"></textarea>
-                                </div>
-                                <div class="col-sm-5">
-                                    <label for="seqCMsecond">Second sequence</label>
-                                    <input class="form-control" id="seqCMsecond" type="text" placeholder="Enter...">
-                                    <label for="textCMsecond">Second contact map data</label>
-                                    <textarea class="form-control" id="textCMsecond" rows="15"></textarea>
+                                <div class="col-sm-8">
+                                    <label for="textData">Contact map (.xy) data</label>
+                                    <textarea class="form-control" id="textData" rows="15"></textarea>
                                 </div>
                                 <div class="col-sm-2">
-                                    <button type="button" class="btn btn-secondary" onclick="drawTextData()">Load</button>
+                                    <button type="button" class="btn btn-secondary" onclick="drawTextData()">Display</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="alert alert-danger" role="alert" id="alertbox" hidden="hidden">
-
                     </div>
                 </div>
             </div>
 
-            <div class="row marketing">
-                <div class="col-lg-12">
-                    <button type="button" class="btn btn-outline-primary active" data-toggle="button" onclick="toggle('cmap1')">First</button>
-                    <button type="button" class="btn btn-outline-warning active" data-toggle="button" onclick="toggle('cmap2')">Second</button>
-                    <button type="button" class="btn btn-outline-danger active" data-toggle="button" onclick="toggle('cmapsum')">Difference</button>
-                </div>
-                <div class="col-lg-12">
-                    <div id="contactMaps"></div>
-                </div>
-                <div id="tooltip" class="hidden">
-                    <p><span id="value"></p>
-                </div>
+            <div class="row marketing" id='cmContainer'>
             </div>
+        </div>
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            (function (b, o, i, l, e, r) {
+                b.GoogleAnalyticsObject = l;
+                b[l] || (b[l] =
+                    function () {
+                        (b[l].q = b[l].q || []).push(arguments)
+                    });
+                b[l].l = +new Date;
+                e = o.createElement(i);
+                r = o.getElementsByTagName(i)[0];
+                e.src = 'https://www.google-analytics.com/analytics.js';
+                r.parentNode.insertBefore(e, r)
+            }(window, document, 'script', 'ga'));
+            ga('create', 'UA-XXXXX-X');
+            ga('send', 'pageview');
+        </script>
 
-            <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
-            <script>
-                (function (b, o, i, l, e, r) {
-                    b.GoogleAnalyticsObject = l;
-                    b[l] || (b[l] =
-                        function () {
-                            (b[l].q = b[l].q || []).push(arguments)
-                        });
-                    b[l].l = +new Date;
-                    e = o.createElement(i);
-                    r = o.getElementsByTagName(i)[0];
-                    e.src = 'https://www.google-analytics.com/analytics.js';
-                    r.parentNode.insertBefore(e, r)
-                }(window, document, 'script', 'ga'));
-                ga('create', 'UA-XXXXX-X');
-                ga('send', 'pageview');
-            </script>
+        <!-- build:js scripts/vendor.js -->
+        <!-- bower:js -->
+        <script src="/bower_components/jquery/dist/jquery.js"></script>
+        <script src="/bower_components/modernizr/modernizr.js"></script>
+        <!-- endbower -->
+        <!-- endbuild -->
 
-            <!-- build:js scripts/vendor.js -->
-            <!-- bower:js -->
-            <script src="/bower_components/jquery/dist/jquery.js"></script>
-            <script src="/bower_components/modernizr/modernizr.js"></script>
-            <!-- endbower -->
-            <!-- endbuild -->
+        <!-- build:js scripts/plugins.js -->
+        <script src="/bower_components/bootstrap/js/affix.js"></script>
+        <script src="/bower_components/bootstrap/js/alert.js"></script>
+        <script src="/bower_components/bootstrap/js/dropdown.js"></script>
+        <script src="/bower_components/bootstrap/js/tooltip.js"></script>
+        <script src="/bower_components/bootstrap/js/modal.js"></script>
+        <script src="/bower_components/bootstrap/js/transition.js"></script>
+        <script src="/bower_components/bootstrap/js/button.js"></script>
+        <script src="/bower_components/bootstrap/js/popover.js"></script>
+        <script src="/bower_components/bootstrap/js/carousel.js"></script>
+        <script src="/bower_components/bootstrap/js/scrollspy.js"></script>
+        <script src="/bower_components/bootstrap/js/collapse.js"></script>
+        <script src="/bower_components/bootstrap/js/tab.js"></script>
+        <!-- endbuild -->
 
-            <!-- build:js scripts/plugins.js -->
-            <script src="/bower_components/bootstrap/js/affix.js"></script>
-            <script src="/bower_components/bootstrap/js/alert.js"></script>
-            <script src="/bower_components/bootstrap/js/dropdown.js"></script>
-            <script src="/bower_components/bootstrap/js/tooltip.js"></script>
-            <script src="/bower_components/bootstrap/js/modal.js"></script>
-            <script src="/bower_components/bootstrap/js/transition.js"></script>
-            <script src="/bower_components/bootstrap/js/button.js"></script>
-            <script src="/bower_components/bootstrap/js/popover.js"></script>
-            <script src="/bower_components/bootstrap/js/carousel.js"></script>
-            <script src="/bower_components/bootstrap/js/scrollspy.js"></script>
-            <script src="/bower_components/bootstrap/js/collapse.js"></script>
-            <script src="/bower_components/bootstrap/js/tab.js"></script>
-            <!-- endbuild -->
+        <!-- build:js scripts/main.js -->
+        <script src="scripts/main.js"></script>
+        <!-- endbuild -->
 
-            <!-- build:js scripts/main.js -->
-            <script src="scripts/main.js"></script>
-            <!-- endbuild -->
+        <script>
+
+            var ContactMapViz = new ContactMap("#cmContainer", "", 900, 900)
+
+
+            d3.queue()
+                .defer(d3.text, './data/example/ex1/d3t2ca_.d3t2fa_.xy')
+//                .defer(d3.text, './data/3kkmA_CM_matrix.csv')
+//                .defer(d3.text, './data/4efmA_CM_matrix.csv')
+//                .defer(d3.text, './data/3kkmA.txt')
+//                .defer(d3.text, './data/4efmA.txt')
+                .await(draw);
+
+            function draw(error, results) {
+                if (error)
+                    throw error;
+                ContactMapViz.draw(results);
+            }
+
+            function drawTextData() {
+                $('#alertbox').hide();
+                var data = $('#textData').val();
+                ContactMapViz.draw(data);
+            }
+
+        </script> 
     </body>
 </html>
