@@ -7,7 +7,7 @@ function ContactMap(parentId, data, width, height) {
 // build template
 
     d3.select(parentId).html(this.buttonsHTML + this.alertHTML + this.cmHTML + this.tooltipHTML);
-    this._width = d3.select(parentId).style("width");
+    this._width = d3.select(parentId).style('width');
     this._width = +this._width.substring(0, this._width.length - 2);
 }
 
@@ -35,7 +35,7 @@ ContactMap.prototype.alert = function (text) {
 
 ContactMap.prototype.parse = function (data) {
 //    console.log(data);
-    var dsv = d3.dsvFormat("\t");
+    var dsv = d3.dsvFormat('\t');
     var max = 0;
     var seq1 = [], seq2 = [];
     var i = -1, n, c;
@@ -74,10 +74,10 @@ ContactMap.prototype.parse = function (data) {
 
     for (i = 0; i <= max; i++) {
         if (!seq1[i]) {
-            seq1[i] = "-";
+            seq1[i] = '-';
         }
         if (!seq2[i]) {
-            seq2[i] = "-";
+            seq2[i] = '-';
         }
     }
     return {max: max, matrix: dataArray, seq1: seq1, seq2: seq2};
@@ -85,7 +85,7 @@ ContactMap.prototype.parse = function (data) {
 
 ContactMap.prototype.draw = function (text) {
     if (text.lenght === 0) {
-        this.alert("Data is empty");
+        this.alert('Data is empty');
         return;
     }
 
@@ -232,19 +232,19 @@ ContactMap.prototype._draw = function () {
         .tickSize(width)
         .tickPadding(-width - 18);
 
-    var gX = viewShifted.append("g")
-        .attr("class", "axis axis--x")
+    var gX = viewShifted.append('g')
+        .attr('class', 'axis axis--x')
         .call(xAxis);
-    var gY = viewShifted.append("g")
-        .attr("class", "axis axis--y")
+    var gY = viewShifted.append('g')
+        .attr('class', 'axis axis--y')
         .call(yAxis);
     //// END OF GRID
 
     ////  ZOOM
     var currentTransform = null;
 
-    var view = viewShifted.append("g")
-        .attr("class", "view");
+    var view = viewShifted.append('g')
+        .attr('class', 'view');
 
     view.append('rect')
         .attr('x',
@@ -268,11 +268,11 @@ ContactMap.prototype._draw = function () {
             [-20, -20],
             [width + 20, height + 20]
         ])
-        .on("zoom", zoomed);
+        .on('zoom', zoomed);
 
     function zoomed() {
         currentTransform = d3.event.transform;
-        view.attr("transform", currentTransform);
+        view.attr('transform', currentTransform);
         gX.call(xAxis.scale(d3.event.transform.rescaleX(xScale)));
         gY.call(yAxis.scale(d3.event.transform.rescaleY(yScale)));
     }
