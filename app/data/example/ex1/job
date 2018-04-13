@@ -1,0 +1,4 @@
+#pdb2seq < d3t2ca_.pdb > d3t2ca_.seq
+#pdb2seq < d3t2fa_.pdb > d3t2fa_.seq
+#bl2 d3t2ca_.seq d3t2fa_.seq > d3t2ca_.d3t2fa_.ali
+../comstr d3t2ca_.pdb d3t2fa_.pdb d3t2ca_.d3t2fa_.ali 10 d3t2ca_.cmap d3t2fa_.cmap d3t2ca_.d3t2fa_.rmsp d3t2ca_.d3t2fa_.cmov  d3t2ca_.d3t2fa_.xy > d3t2ca_.d3t2fa_.txt
