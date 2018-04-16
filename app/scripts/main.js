@@ -2,95 +2,117 @@
  * @author Mayya Sedova <msedova.dev@gmail.com>
  */
 
-function ContactMap(parentId, data, width, height) {
-
-// build template
-
-    d3.select(parentId).html(this.buttonsHTML + this.alertHTML + this.cmHTML + this.tooltipHTML);
-    this._width = d3.select(parentId).style('width');
-    this._width = +this._width.substring(0, this._width.length - 2);
+function ContactMap(parentId) {
+    d3.select(parentId).html('<div class="row px-3" style="width:100%">' + this.buttonsHTML + this.alertHTML + '</div>' + this.cmHTML + this.tooltipHTML);
+    this.hideAlert();
+    this._parentId = parentId;
 }
 
-
-ContactMap.prototype.buttonsHTML = '<div class="col-lg-12">' +
-    '<button type="button" class="btn btn-outline-primary active"' +
+ContactMap.prototype.buttonsHTML = '<div class="col-6">' +
+    '<button type="button" class="btn btn-outline-primary btn-sm active mx-1"' +
     'data-toggle="button" onclick="toggle(\'cmap1\')">First</button>' +
-    '<button type="button" class="btn btn-outline-warning active" ' +
+    '<button type="button" class="btn btn-outline-warning btn-sm active mx-1" ' +
     ' data-toggle="button" onclick="toggle(\'cmap2\')">Second</button>' +
-    '<button type="button" class="btn btn-outline-danger active" ' +
+    '<button type="button" class="btn btn-outline-danger btn-sm active mx-1" ' +
     ' data-toggle="button" onclick="toggle(\'cmapsum\')">Difference</button>' +
     '</div>';
-ContactMap.prototype.alertHTML = '<div class="alert alert-danger" role="alert" ' +
-    'id="alertbox" hidden="hidden"></div>'
-ContactMap.prototype.cmHTML = '<div class="col-lg-12"><div id="contactMaps"></div></div>';
-ContactMap.prototype.tooltipHTML = '<div id="tooltip" class="hidden">    ' +
+ContactMap.prototype.alertHTML = '<div class="alert alert-light col-6" role="alert" ' +
+    'id="alertbox">&nbsp;</div>'
+ContactMap.prototype.cmHTML = '<div class="row"><div class="col-12"><div id="contactMaps"></div></div>';
+ContactMap.prototype.tooltipHTML = '<div id="tooltip" class="hidden">' +
     '<p><span id="value"></p>' +
-    '</div>';
+    '</div></div>';
 
+ContactMap.prototype.clear = function () {
+    this.hideAlert();
+    this._width = 0;
+    this.data = null;
+    d3.select('svg').remove();
+    d3.select('#contactMaps').select('*').remove();
+};
 
 ContactMap.prototype.alert = function (text) {
-    $('#alertbox').html(text);
-    $('#alertbox').show();
-}
+    d3.select('#alertbox').html(text);
+};
+
+
+ContactMap.prototype.hideAlert = function () {
+    d3.select('#alertbox').html('');
+};
+
 
 ContactMap.prototype.parse = function (data) {
 //    console.log(data);
-    var dsv = d3.dsvFormat('\t');
-    var max = 0;
-    var seq1 = [], seq2 = [];
-    var i = -1, n, c;
-    var dataArray = dsv.parseRows(data, function (d, i) {
-//        console.log (d);
-//        if (i < 3)
-//            return null; // skip headers - no more valid
-        max = Math.max(max, +d[1]);
-        n = +d[0].substring(1);
-        c = d[0].substring(0, 1);
-        seq1[n] = c;
+    try {
+        var dsv = d3.dsvFormat('\t');
+        var max = 0;
+        var seq1 = [], seq2 = [];
+        var i = -1, n, c;
+        var dataArray = dsv.parseRows(data, function (d, i) {
 
-        n = +d[5].substring(1);
-        c = d[5].substring(0, 1);
-        seq2[n] = c;
+            max = Math.max(max, +d[1], +d[3], +d[6], +d[8]);
 
-        return {
-            id: i++,
-            structure1: {
-                res1: d[0],
-                col: +d[1], //grx
-                res2: d[2],
-                row: +d[3], //gry
-                value: +d[4] //cont
-            },
-            structure2: {
-                res1: d[5],
-                col: +d[6],
-                res2: d[7],
-                row: +d[8],
-                value: +d[9]
+            n = +d[0].substring(1);
+            c = d[0].substring(0, 1);
+            seq1[n] = c;
+
+            n = +d[5].substring(1);
+            c = d[5].substring(0, 1);
+            seq2[n] = c;
+
+            return {
+                id: i++,
+                structure1: {
+                    res1: d[0],
+                    col: +d[1], //grx
+                    res2: d[2],
+                    row: +d[3], //gry
+                    value: +d[4] //cont
+                },
+                structure2: {
+                    res1: d[5],
+                    col: +d[6],
+                    res2: d[7],
+                    row: +d[8],
+                    value: +d[9]
+                }
+            };
+        });
+//    console.log(max);
+
+        for (i = 0; i <= max; i++) {
+            if (!seq1[i]) {
+                seq1[i] = '-';
             }
-        };
-    });
-//    console.log(dataArray);
-
-    for (i = 0; i <= max; i++) {
-        if (!seq1[i]) {
-            seq1[i] = '-';
+            if (!seq2[i]) {
+                seq2[i] = '-';
+            }
         }
-        if (!seq2[i]) {
-            seq2[i] = '-';
-        }
+        return {max: max, matrix: dataArray, seq1: seq1, seq2: seq2};
+    } catch (e) {
+        console.log(e);
+        this.alert('Wrong input format. ');
+        return null;
     }
-    return {max: max, matrix: dataArray, seq1: seq1, seq2: seq2};
 }
 
 ContactMap.prototype.draw = function (text) {
-    if (text.lenght === 0) {
-        this.alert('Data is empty');
+    text = text.trim();
+    if (text.length === 0) {
+        this.alert('Input data is empty.');
         return;
     }
 
+    var pleft = parseInt(d3.select(this._parentId).style('padding-left')),
+        pright = parseInt(d3.select(this._parentId).style('padding-right'));
+    this._width = parseInt(d3.select(this._parentId).style('width'))
+        - pleft - pright - 15; // little less than inner width of parent element
+
+
     this.data = this.parse(text);
-    this._draw();
+    if (this.data != null) {
+        this._draw();
+    }
 }; // end of draw()
 
 
@@ -148,7 +170,7 @@ ContactMap.prototype._createCMap = function (data, id, svg, cellSize, colorCallb
         })
         ;
 
-}
+};
 
 ContactMap.prototype._getTooltipText = function (r, c) {
     var res1 = this.data.seq1[r];
@@ -161,8 +183,6 @@ ContactMap.prototype._getTooltipText = function (r, c) {
 };
 
 ContactMap.prototype._createTooltip = function (d, self) {
-    //Update the tooltip position and value
-
     d3.select('#tooltip')
         .style('left', (d3.event.pageX + 10) + 'px')
         .style('top', (d3.event.pageY - 10) + 'px')
@@ -172,6 +192,8 @@ ContactMap.prototype._createTooltip = function (d, self) {
 };
 
 ContactMap.prototype._draw = function () {
+
+    d3.select('#contactMaps').select('*').remove();
 
     var data1 = this.data.matrix
         .filter(d => d.structure1.value > 0)
@@ -189,23 +211,46 @@ ContactMap.prototype._draw = function () {
 
     var datasum = this.data.matrix
         .filter(d =>
-            d.structure1.value !=
-                d.structure2.value
+            d.structure1.value !== d.structure2.value
         )
         .map(d => {
             return{row: d.structure2.row, col: d.structure2.col,
                 value: d.structure2.value - d.structure1.value, id: d.id};
         });
 
-    var adjwidth = this._width || 900,
+    this.alert(`There are ${datasum.length} non-matching contacts.`);
+
+    var outerwidth = this._width || 400,
         cols = this.data.max,
         rows = cols,
         margin = {top: 50, right: 20, bottom: 20, left: 50},
-        cellSize = Math.max(2, Math.floor((adjwidth - margin.left - margin.right) / (this.data.max + 1))),
-        width = Math.max(adjwidth, cellSize * cols),
-        height = width;
+        innerWidth = outerwidth - margin.left - margin.right,
+        cellSize = innerWidth / cols,
+        width = innerWidth,
+        height = innerWidth,
+        currentTransform = null;
 
-    d3.select('#contactMaps').append('svg').remove();
+    var zoom = d3.zoom()
+        .scaleExtent([.75, 5])
+        .translateExtent([
+            [-20, -20],
+            [width + 40, height + 40]
+        ])
+        .on('zoom', zoomed);
+
+// add slider instead of mousewheel zoom to improve user experience
+// have it start at min 50% and max out at 5x the amount.
+// you'll also have to add slider.attr('value', d3.event.scale) in the zoom method to update slider
+    var slider = d3.select('#contactMaps').append('input')
+        .datum({})
+        .attr('type', 'range')
+        .attr('value', 1)
+        .attr('min', zoom.scaleExtent()[0])
+        .attr('max', zoom.scaleExtent()[1])
+        .attr('step', (zoom.scaleExtent()[1] - zoom.scaleExtent()[0]) / 100)
+        .on('input', slided);
+
+
     var svg = d3.select('#contactMaps').append('svg')
         .attr('width', width + margin.left + margin.right)
         .attr('height', width + margin.top + margin.bottom);
@@ -213,6 +258,7 @@ ContactMap.prototype._draw = function () {
     var viewShifted = svg.append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
         ;
+
     /////// GRID
     var xScale = d3.scaleLinear()
         .domain([0, cols])
@@ -241,42 +287,8 @@ ContactMap.prototype._draw = function () {
     //// END OF GRID
 
     ////  ZOOM
-    var currentTransform = null;
-
     var view = viewShifted.append('g')
         .attr('class', 'view');
-
-    view.append('rect')
-        .attr('x',
-            cols * cellSize
-            )
-        .attr('y',
-            rows * cellSize
-            )
-
-        .attr('width', cellSize)
-        .attr('height', cellSize)
-        .attr('fill', 'magenta');
-
-
-    if (currentTransform)
-        view.attr('transform', currentTransform);
-
-    var zoom = d3.zoom()
-        .scaleExtent([1, 5])
-        .translateExtent([
-            [-20, -20],
-            [width + 20, height + 20]
-        ])
-        .on('zoom', zoomed);
-
-    function zoomed() {
-        currentTransform = d3.event.transform;
-        view.attr('transform', currentTransform);
-        gX.call(xAxis.scale(d3.event.transform.rescaleX(xScale)));
-        gY.call(yAxis.scale(d3.event.transform.rescaleY(yScale)));
-    }
-    svg.call(zoom);
 
     this._createCMap(data1, 'cmap1', view, cellSize, function (d) {
         return '#007bff';
@@ -289,6 +301,25 @@ ContactMap.prototype._draw = function () {
     this._createCMap(datasum, 'cmapsum', view, cellSize, function (d) {
         return  (d.value > 0) ? '#D50000' : '#28a745';
     });
+
+
+    if (currentTransform)
+        view.attr('transform', currentTransform);
+///---------
+
+    function zoomed() {
+        currentTransform = d3.event.transform;
+        view.attr('transform', currentTransform);
+        gX.call(xAxis.scale(d3.event.transform.rescaleX(xScale)));
+        gY.call(yAxis.scale(d3.event.transform.rescaleY(yScale)));
+    }
+
+    function slided(d) {
+        zoom.scaleTo(svg, d3.select(this).property('value'));
+    }
+    // disable zoom on mousewheel and double click
+    svg.call(zoom).on('wheel.zoom', null)
+        .on('dblclick.zoom', null);
 
 };
 

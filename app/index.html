@@ -5,7 +5,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>ContactMapViz</title>
 
         <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -25,10 +25,9 @@
         <script src="/bower_components/jquery/dist/jquery.min.js"></script>
         <script src="/bower_components/modernizr/modernizr.js"></script>
         <!-- endbuild -->
-
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
-
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <style>
+
             /* disable text selection */
             svg *::selection {
                 background : transparent;
@@ -40,6 +39,9 @@
 
             svg *::-webkit-selection {
                 background:transparent;
+            }
+            svg{
+                border: 1px solid #EEE;
             }
 
             rect.selection {
@@ -106,30 +108,68 @@
                 font-size: 12px;
                 line-height: 20px;
             }
-/*            .axis path {
-    display: none;
-}
-.axis line {
-    stroke-opacity: 0.3;
-    shape-rendering: crispEdges;
-}*/
+            .axis path {
+                display: none;
+            }
+            .axis line {
+                stroke-opacity: 0.3;
+                shape-rendering: crispEdges;
+            }
+
+            #cmContainer {
+                padding:15px;
+            }
         </style>
 
         <script src="https://d3js.org/d3.v4.min.js"></script>
 
+
+        <!-- build:js scripts/main.js -->
+        <script src="scripts/main.js"></script>
+        <!-- endbuild -->
+
+        <script>
+            var ContactMapViz;
+
+            function draw(error, results) {
+                if (error)
+                    throw error;
+                ContactMapViz.draw(results);
+            }
+
+            function drawData() {
+                console.log('drawing');
+                var data = $('#textData').val();
+                ContactMapViz.draw(data);
+            }
+
+            function clearData() {
+                console.log("clearing...");
+                $('#textData').val("");
+                ContactMapViz.clear();
+            }
+
+            $(document).ready(function () {
+                ContactMapViz = new ContactMap("#cmContainer")
+                d3.queue()
+                    .defer(d3.text, './data/example/ex1/d3t2ca_.d3t2fa_.xy')
+                    .await(draw);
+            });
+
+
+        </script> 
     </head>
     <body>
         <!--[if IE]>
           <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-        <div class="container" style="max-width:95%">
+        <div class="container-fluid" >
             <div class="header">                
                 <h3 class="text-muted">ContactMapViz</h3>
             </div>
             <div class="row">
                 <div class="col-sm-12">
-
                     <div class="card">
                         <div class="card-header" id="headingOne">
                             <h5 class="mb-0">
@@ -143,12 +183,12 @@
                                     <textarea class="form-control" id="textData" rows="15"></textarea>
                                 </div>
                                 <div class="col-sm-2">
-                                    <button type="button" class="btn btn-secondary" onclick="drawTextData()">Display</button>
+                                    <button type="button" class="btn btn-secondary btn-sm mx-1" onclick="drawData()">Display</button>
+                                   
+                                    <button type="button" class="btn btn-secondary btn-sm mx-1" onclick="clearData();">Clear</button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="alert alert-danger" role="alert" id="alertbox" hidden="hidden">
                     </div>
                 </div>
             </div>
@@ -176,55 +216,14 @@
 
         <!-- build:js scripts/vendor.js -->
         <!-- bower:js -->
-        <script src="/bower_components/jquery/dist/jquery.js"></script>
         <script src="/bower_components/modernizr/modernizr.js"></script>
         <!-- endbower -->
         <!-- endbuild -->
 
         <!-- build:js scripts/plugins.js -->
-        <script src="/bower_components/bootstrap/js/affix.js"></script>
-        <script src="/bower_components/bootstrap/js/alert.js"></script>
-        <script src="/bower_components/bootstrap/js/dropdown.js"></script>
-        <script src="/bower_components/bootstrap/js/tooltip.js"></script>
-        <script src="/bower_components/bootstrap/js/modal.js"></script>
-        <script src="/bower_components/bootstrap/js/transition.js"></script>
-        <script src="/bower_components/bootstrap/js/button.js"></script>
-        <script src="/bower_components/bootstrap/js/popover.js"></script>
-        <script src="/bower_components/bootstrap/js/carousel.js"></script>
-        <script src="/bower_components/bootstrap/js/scrollspy.js"></script>
-        <script src="/bower_components/bootstrap/js/collapse.js"></script>
-        <script src="/bower_components/bootstrap/js/tab.js"></script>
+        <script src="/bower_components/bootstrap/dist/js/bootstrap.bundle.js" type="text/javascript"></script>
         <!-- endbuild -->
 
-        <!-- build:js scripts/main.js -->
-        <script src="scripts/main.js"></script>
-        <!-- endbuild -->
 
-        <script>
-
-            var ContactMapViz = new ContactMap("#cmContainer", "", 900, 900)
-
-
-            d3.queue()
-                .defer(d3.text, './data/example/ex1/d3t2ca_.d3t2fa_.xy')
-//                .defer(d3.text, './data/3kkmA_CM_matrix.csv')
-//                .defer(d3.text, './data/4efmA_CM_matrix.csv')
-//                .defer(d3.text, './data/3kkmA.txt')
-//                .defer(d3.text, './data/4efmA.txt')
-                .await(draw);
-
-            function draw(error, results) {
-                if (error)
-                    throw error;
-                ContactMapViz.draw(results);
-            }
-
-            function drawTextData() {
-                $('#alertbox').hide();
-                var data = $('#textData').val();
-                ContactMapViz.draw(data);
-            }
-
-        </script> 
     </body>
 </html>
