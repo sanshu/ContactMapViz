@@ -97,6 +97,7 @@ ContactMap.prototype.parse = function (data) {
 }
 
 ContactMap.prototype.draw = function (text) {
+    this.clear();
     text = text.trim();
     if (text.length === 0) {
         this.alert('Input data is empty.');
@@ -193,7 +194,7 @@ ContactMap.prototype._createTooltip = function (d, self) {
 
 ContactMap.prototype._draw = function () {
 
-    d3.select('#contactMaps').select('*').remove();
+//    d3.select('#contactMaps').select('*').remove();
 
     var data1 = this.data.matrix
         .filter(d => d.structure1.value > 0)

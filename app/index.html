@@ -123,7 +123,6 @@
 
         <script src="https://d3js.org/d3.v4.min.js"></script>
 
-
         <!-- build:js scripts/main.js -->
         <script src="scripts/main.js"></script>
         <!-- endbuild -->
@@ -148,12 +147,31 @@
                 $('#textData').val("");
                 ContactMapViz.clear();
             }
+            
+            function showExample(id) {
+                var file = "";
+                switch (id) {
+                    case 2:
+                    {
+                        file = './data/example/ex2/1btlA_.1dy6A_.xy';
+                        break;
+                        ;
+                    }
+                    case 1:
+                    default:
+                    {
+                        file = './data/example/ex1/d3t2ca_.d3t2fa_.xy';
+                        break;
+                    }
+                }
+                d3.queue()
+                    .defer(d3.text, file)
+                    .await(draw);
+            }
 
             $(document).ready(function () {
                 ContactMapViz = new ContactMap("#cmContainer")
-                d3.queue()
-                    .defer(d3.text, './data/example/ex1/d3t2ca_.d3t2fa_.xy')
-                    .await(draw);
+                showExample(1);
             });
 
 
@@ -184,8 +202,11 @@
                                 </div>
                                 <div class="col-sm-2">
                                     <button type="button" class="btn btn-secondary btn-sm mx-1" onclick="drawData()">Display</button>
-                                   
+
                                     <button type="button" class="btn btn-secondary btn-sm mx-1" onclick="clearData();">Clear</button>
+                                    <br />
+                                    <button type="button" class="btn btn-link" onclick="showExample(1)">Example 1 (d3t2ca_.d3t2fa_)</button>
+                                    <button type="button" class="btn btn-link" onclick="showExample(2)">Example 2 (1btlA_.1dy6A_)</button>
                                 </div>
                             </div>
                         </div>
@@ -223,7 +244,5 @@
         <!-- build:js scripts/plugins.js -->
         <script src="/bower_components/bootstrap/dist/js/bootstrap.bundle.js" type="text/javascript"></script>
         <!-- endbuild -->
-
-
     </body>
 </html>
