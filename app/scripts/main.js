@@ -98,8 +98,9 @@ ContactMap.prototype.parse = function (data) {
 
 ContactMap.prototype.draw = function (text) {
     this.clear();
-    text = text.trim();
-    if (text.length === 0) {
+    console.log('Cleared..');
+
+    if (text.trim().length === 0) {
         this.alert('Input data is empty.');
         return;
     }
@@ -110,8 +111,8 @@ ContactMap.prototype.draw = function (text) {
         - pleft - pright - 15; // little less than inner width of parent element
 
 
-    this.data = this.parse(text);
-    if (this.data != null) {
+    this.data = this.parse(text.trim());
+    if (this.data !== null) {
         this._draw();
     }
 }; // end of draw()
