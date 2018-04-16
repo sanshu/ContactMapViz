@@ -1,0 +1,4 @@
+Contact map overlap:   0.730
+C-alpha RMSD:   2.100
+Translation vector: -10.204  -32.975   15.399 
+Rotation matrix:  -0.879   -0.345    0.329    0.368   -0.052    0.928   -0.303    0.937    0.173 
