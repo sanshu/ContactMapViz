@@ -118,12 +118,84 @@ ContactMap.prototype.draw = function (text) {
 }; // end of draw()
 
 
+ContactMap.prototype._addSequences = function (svg, cellSize) {
+    const self = this;
+    var enterSelection = svg.append('g').attr('class', 'g3')
+        .attr('id', 'sequences1')
+        .attr('text-anchor', 'middle')
+        .attr('alignment-baseline', 'middle')
+        .attr('font-size', cellSize * 1.2)
+        .selectAll('.seq')
+        .data(this.data.seq1, function (d) {
+            return d;   /// ????
+        })
+        .enter();
+
+    // 1st sequence
+    enterSelection.append('text')
+        .attr('dx', function (d, i) {
+            return (i + 0.5) * cellSize;
+        })
+        .attr('dy', function (d) {
+            return -cellSize * 3;
+        })
+        .text(function (d, i) {
+            return d;
+        });
+
+    //vertical
+    enterSelection.append('text')
+        .attr('dy', function (d, i) {
+            return (i + 1) * cellSize;
+        })
+        .attr('dx', function (d) {
+            return -cellSize * 3;
+        })
+        .text(function (d, i) {
+            return d;
+        });
+
+    enterSelection = svg.append('g').attr('class', 'g3')
+        .attr('id', 'sequences2')
+        .attr('text-anchor', 'middle')
+        .attr('alignment-baseline', 'middle')
+        .attr('font-size', cellSize * 1.2)
+        .selectAll('.seq')
+        .data(this.data.seq2, function (d) {
+            return d;   /// ????
+        })
+        .enter();
+
+    enterSelection.append('text')
+        .attr('dx', function (d, i) {
+            return (i + 0.5) * cellSize;
+        })
+        .attr('dy', function (d) {
+            return -cellSize;
+        })
+        .text(function (d) {
+            return d;
+        });
+
+         //vertical
+    enterSelection.append('text')
+        .attr('dy', function (d, i) {
+            return (i + 1) * cellSize;
+        })
+        .attr('dx', function (d) {
+            return -cellSize;
+        })
+        .text(function (d, i) {
+            return d;
+        });
+};
+
 ContactMap.prototype._createCMap = function (data, id, svg, cellSize, colorCallback) {
     const self = this;
     var enterSelection = svg.append('g').attr('class', 'g3').attr('id', id)
         .selectAll('.cellg')
         .data(data, function (d) {
-            return d.row + ':' + d.col;
+            return d.row + ':' + d.col;  /// ???? why?
         })
         .enter();
 
@@ -291,6 +363,8 @@ ContactMap.prototype._draw = function () {
     ////  ZOOM
     var view = viewShifted.append('g')
         .attr('class', 'view');
+
+    this._addSequences(view, cellSize);
 
     this._createCMap(data1, 'cmap1', view, cellSize, function (d) {
         return '#007bff';
