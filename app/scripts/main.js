@@ -52,11 +52,11 @@ ContactMap.prototype.parse = function (data) {
 
             max = Math.max(max, +d[1], +d[3], +d[6], +d[8]);
 
-            n = +d[0].substring(1);
+            n = +d[1];//+d[0].substring(1);
             c = d[0].substring(0, 1);
             seq1[n] = c;
 
-            n = +d[5].substring(1);
+            n = +d[6];//+d[5].substring(1);
             c = d[5].substring(0, 1);
             seq2[n] = c;
 
