@@ -41,40 +41,56 @@ ContactMap.prototype.hideAlert = function () {
 };
 
 
-ContactMap.prototype.parse = function (data) {
+ContactMap.prototype._parse = function (data) {
 //    console.log(data);
+    /*
+     * column 1 is residue type and number for the 1-st residue in a contact
+     column 2 is the x coordinate for this contact on the graph
+     column 3 is residue type and number for the 2nd residue in a contact
+     column 4 is the y coordinate for this contact on the graph
+     column 5 is structure number (1 or 2)
+     */
     try {
         var dsv = d3.dsvFormat('\t');
         var max = 0;
         var seq1 = [], seq2 = [];
-        var i = -1, n, c;
+        var i = -1, n, s, r, c;
+        var sumMatrix = [];
+        var op = 1;
         var dataArray = dsv.parseRows(data, function (d, i) {
 
-            max = Math.max(max, +d[1], +d[3], +d[6], +d[8]);
+            c = +d[1];
+            r = +d[3];
+            max = Math.max(max, r, c);
 
-            n = +d[1];//+d[0].substring(1);
-            c = d[0].substring(0, 1);
-            seq1[n] = c;
+            n = +d[1];
+            s = d[0].substring(0, 1);
 
-            n = +d[6];//+d[5].substring(1);
-            c = d[5].substring(0, 1);
-            seq2[n] = c;
+            if (+d[4] === 1) {
+                seq1[n] = s;
+                op = 1;
+            } else {
+                seq2[n] = s;
+                op = -1;
+            }
+
+            if (!sumMatrix[c]) {
+                sumMatrix[c] = [];
+            }
+            var m = sumMatrix[c][r];
+            m = m ? m + op : op;
+
+            sumMatrix[c][r] = m;
 
             return {
                 id: i++,
-                structure1: {
+                structure: {
                     res1: d[0],
-                    col: +d[1], //grx
+                    col: c, //grx
                     res2: d[2],
-                    row: +d[3], //gry
-                    value: +d[4] //cont
-                },
-                structure2: {
-                    res1: d[5],
-                    col: +d[6],
-                    res2: d[7],
-                    row: +d[8],
-                    value: +d[9]
+                    row: r, //gry
+                    structId: +d[4], //cont
+                    value: 1
                 }
             };
         });
@@ -88,10 +104,11 @@ ContactMap.prototype.parse = function (data) {
                 seq2[i] = '-';
             }
         }
-        return {max: max, matrix: dataArray, seq1: seq1, seq2: seq2};
+
+        return {max: max, matrix: dataArray, seq1: seq1, seq2: seq2, datasum: sumMatrix};
     } catch (e) {
         console.log(e);
-        this.alert('Wrong input format. ');
+        this.alert('Wrong input format. Required format: [res1 gridX res2 gridY strustureId]');
         return null;
     }
 }
@@ -111,12 +128,12 @@ ContactMap.prototype.draw = function (text) {
         - pleft - pright - 15; // little less than inner width of parent element
 
 
-    this.data = this.parse(text.trim());
+    this.data = this._parse(text.trim());
+    console.log(this.data);
     if (this.data !== null) {
         this._draw();
     }
 }; // end of draw()
-
 
 ContactMap.prototype._addSequences = function (svg, cellSize) {
     const self = this;
@@ -177,7 +194,7 @@ ContactMap.prototype._addSequences = function (svg, cellSize) {
             return d;
         });
 
-         //vertical
+    //vertical
     enterSelection.append('text')
         .attr('dy', function (d, i) {
             return (i + 1) * cellSize;
@@ -267,30 +284,39 @@ ContactMap.prototype._createTooltip = function (d, self) {
 
 ContactMap.prototype._draw = function () {
 
-//    d3.select('#contactMaps').select('*').remove();
-
     var data1 = this.data.matrix
-        .filter(d => d.structure1.value > 0)
+        .filter(d => d.structure.structId === 1 && d.structure.value > 0)
         .map(d => {
-            return{row: d.structure1.row, col: d.structure1.col,
-                value: d.structure1.value, id: d.id};
+            return{row: d.structure.row, col: d.structure.col,
+                value: d.structure.value, id: d.id};
         });
+    console.log('Data1: ');
+    console.log(data1);
 
     var data2 = this.data.matrix
-        .filter(d => d.structure2.value > 0)
+        .filter(d => d.structure.structId === 2 && d.structure.value > 0)
         .map(d => {
-            return{row: d.structure2.row, col: d.structure2.col,
-                value: d.structure2.value, id: d.id};
+            return{row: d.structure.row, col: d.structure.col,
+                value: d.structure.value, id: d.id};
         });
 
-    var datasum = this.data.matrix
-        .filter(d =>
-            d.structure1.value !== d.structure2.value
-        )
-        .map(d => {
-            return{row: d.structure2.row, col: d.structure2.col,
-                value: d.structure2.value - d.structure1.value, id: d.id};
+    console.log('Data2: ');
+    console.log(data2);
+
+    var datasum = [];
+    this.data.datasum.forEach(function (r, i) {
+        r.forEach(function (c, j) {
+            if (c !== 0) {
+                datasum.push({row: i, col: j,
+                    value: c})
+            }
         });
+    }
+    );
+
+    console.log('Datasum: ');
+    console.log(datasum);
+
 
     this.alert(`There are ${datasum.length} non-matching contacts.`);
 
