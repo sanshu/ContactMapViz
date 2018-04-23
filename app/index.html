@@ -169,6 +169,7 @@
             function clearData() {
                 console.log("clearing...");
                 $('#textData').val("");
+                $('#aliData').val("");
                 ContactMapViz.clear();
             }
 
@@ -256,10 +257,10 @@
                                     <label for="aliData">Alignment (.ali) data</label>
                                     <textarea class="form-control" id="aliData" rows="5"></textarea>
                                 </div>
-                                <div class="col-sm-3"><div class="small alert alert-info">
+<!--                                <div class="col-sm-3"><div class="small alert alert-info">
                                     If the alignment is not provided, it will be parsed from .xy data
                                     </div>
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>

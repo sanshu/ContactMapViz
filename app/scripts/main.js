@@ -55,8 +55,7 @@ ContactMap.prototype._parse = function (json) {
     try {
         var dsv = d3.dsvFormat('\t');
         var max = 0;
-        var seq1 = [], seq2 = [];
-        var i = -1, n, s, r, c;
+        var n, s, r, c;
         var sumMatrix = [];
         var op = 1;
         var dataArray = dsv.parseRows(data, function (d, i) {
@@ -69,10 +68,8 @@ ContactMap.prototype._parse = function (json) {
             s = d[0].substring(0, 1);
 
             if (+d[4] === 1) {
-                seq1[n] = s;
                 op = 1;
             } else {
-                seq2[n] = s;
                 op = -1;
             }
 
@@ -97,17 +94,8 @@ ContactMap.prototype._parse = function (json) {
             };
         });
 //    console.log(max);
-
-        for (i = 0; i <= max; i++) {
-            if (!seq1[i]) {
-                seq1[i] = '-';
-            }
-            if (!seq2[i]) {
-                seq2[i] = '-';
-            }
-        }
-
-        return {max: max, matrix: dataArray, seq1: json.seq1 || seq1, seq2: json.seq2 || seq2, datasum: sumMatrix};
+//
+        return {max: max, matrix: dataArray, seq1: json.seq1, seq2: json.seq2, datasum: sumMatrix};
     } catch (e) {
         console.log(e);
         this.alert('Wrong input format. Required format: [res1 gridX res2 gridY strustureId]');
@@ -139,74 +127,80 @@ ContactMap.prototype.draw = function (json) {
 
 ContactMap.prototype._addSequences = function (svg, cellSize) {
     const self = this;
-    var enterSelection = svg.append('g').attr('class', 'g3')
-        .attr('id', 'sequences1')
-        .attr('text-anchor', 'middle')
-        .attr('alignment-baseline', 'middle')
-        .attr('font-size', cellSize * 1.2)
-        .selectAll('.seq')
-        .data(this.data.seq1, function (d) {
-            return d;   /// ????
-        })
-        .enter();
 
-    // 1st sequence
-    enterSelection.append('text')
-        .attr('dx', function (d, i) {
-            return (i + 0.5) * cellSize;
-        })
-        .attr('dy', function (d) {
-            return -cellSize * 3;
-        })
-        .text(function (d, i) {
-            return d;
-        });
+    if (this.data.seq1) {
+        var enterSelection = svg.append('g').attr('class', 'g3')
+            .attr('id', 'sequences1')
+            .attr('text-anchor', 'middle')
+            .attr('alignment-baseline', 'middle')
+            .attr('font-size', cellSize * 1.2)
+            .selectAll('.seq')
+            .data(this.data.seq1, function (d) {
+                return d;   /// ????
+            })
+            .enter();
 
-    //vertical
-    enterSelection.append('text')
-        .attr('dy', function (d, i) {
-            return (i + 1) * cellSize;
-        })
-        .attr('dx', function (d) {
-            return -cellSize * 3;
-        })
-        .text(function (d, i) {
-            return d;
-        });
 
-    enterSelection = svg.append('g').attr('class', 'g3')
-        .attr('id', 'sequences2')
-        .attr('text-anchor', 'middle')
-        .attr('alignment-baseline', 'middle')
-        .attr('font-size', cellSize * 1.2)
-        .selectAll('.seq')
-        .data(this.data.seq2, function (d) {
-            return d;   /// ????
-        })
-        .enter();
+        // 1st sequence
+        enterSelection.append('text')
+            .attr('dx', function (d, i) {
+                return (i + 0.5) * cellSize;
+            })
+            .attr('dy', function (d) {
+                return -cellSize * 3;
+            })
+            .text(function (d, i) {
+                return d;
+            });
 
-    enterSelection.append('text')
-        .attr('dx', function (d, i) {
-            return (i + 0.5) * cellSize;
-        })
-        .attr('dy', function (d) {
-            return -cellSize;
-        })
-        .text(function (d) {
-            return d;
-        });
+        //vertical
+        enterSelection.append('text')
+            .attr('dy', function (d, i) {
+                return (i + 1) * cellSize;
+            })
+            .attr('dx', function (d) {
+                return -cellSize * 3;
+            })
+            .text(function (d, i) {
+                return d;
+            });
+    }
 
-    //vertical
-    enterSelection.append('text')
-        .attr('dy', function (d, i) {
-            return (i + 1) * cellSize;
-        })
-        .attr('dx', function (d) {
-            return -cellSize;
-        })
-        .text(function (d, i) {
-            return d;
-        });
+    if (this.data.seq2) {
+        enterSelection = svg.append('g').attr('class', 'g3')
+            .attr('id', 'sequences2')
+            .attr('text-anchor', 'middle')
+            .attr('alignment-baseline', 'middle')
+            .attr('font-size', cellSize * 1.2)
+            .selectAll('.seq')
+            .data(this.data.seq2, function (d) {
+                return d;   /// ????
+            })
+            .enter();
+
+        enterSelection.append('text')
+            .attr('dx', function (d, i) {
+                return (i + 0.5) * cellSize;
+            })
+            .attr('dy', function (d) {
+                return -cellSize;
+            })
+            .text(function (d) {
+                return d;
+            });
+
+        //vertical
+        enterSelection.append('text')
+            .attr('dy', function (d, i) {
+                return (i + 1) * cellSize;
+            })
+            .attr('dx', function (d) {
+                return -cellSize;
+            })
+            .text(function (d, i) {
+                return d;
+            });
+    }
 };
 
 ContactMap.prototype._createCMap = function (data, id, svg, cellSize, colorCallback) {
@@ -266,13 +260,23 @@ ContactMap.prototype._createCMap = function (data, id, svg, cellSize, colorCallb
 };
 
 ContactMap.prototype._getTooltipText = function (r, c) {
-    var res1 = this.data.seq1[r];
-    var res2 = this.data.seq1[c];
-    var res3 = this.data.seq2[r];
-    var res4 = this.data.seq2[c];
-    r = r + 1;
-    c = c + 1;
-    return 'CM1[' + res1 + r + ':' + res2 + c + '], CM2[' + res3 + r + ':' + res4 + c + ']';
+    var cm1 = '', cm2 = '';
+
+    if (this.data.seq1) {
+        var res1 = this.data.seq1[r];
+        var res2 = this.data.seq1[c];
+        cm1 = 'CM1[' + res1 + (r + 1) + ':' + res2 + (c + 1) + ']';
+    }
+    if (this.data.seq2) {
+        var res3 = this.data.seq2[r];
+        var res4 = this.data.seq2[c];
+        cm2 = 'CM2[' + res3 + (r + 1) + ':' + res4 + (c + 1) + ']';
+    }
+    if (cm1.length > 0 || cm2.length > 0)
+        return cm1 + ', ' + cm2;
+    else {
+        return cm1 + cm2;
+    }
 };
 
 ContactMap.prototype._createTooltip = function (d, self) {
