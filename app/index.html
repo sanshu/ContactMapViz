@@ -131,8 +131,8 @@
             var ContactMapViz;
 
             function parseAlignment(alignment) {
-                if (alignment === null || alignment.trim().length === 0){
-                    return [null,null];
+                if (alignment === null || alignment.trim().length === 0) {
+                    return [null, null];
                 }
                 /**
                  >>                 
@@ -234,6 +234,21 @@
                                     <br />
                                     <button type="button" class="btn btn-link" onclick="showExample(1)">Example 1 (d3t2ca_.d3t2fa_)</button>
                                     <button type="button" class="btn btn-link" onclick="showExample(2)">Example 2 (1btlA_.1dy6A_)</button>
+
+                                    <div class="small alert alert-info">
+                                        *.xy file is now a simple list:<br>
+                                        <ul><li>
+                                                column 1 is residue type and number for the 1-st residue in a contact</li>
+                                            <li>
+                                                column 2 is the x coordinate for this contact on the graph</li>
+                                            <li>
+                                                column 3 is residue type and number for the 2nd residue in a contact</li>
+                                            <li>
+                                                column 4 is the y coordinate for this contact on the graph</li>
+                                            <li>
+                                                column 5 is structure number (1 or 2)</li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                             <div class="row"> 
@@ -241,8 +256,9 @@
                                     <label for="aliData">Alignment (.ali) data</label>
                                     <textarea class="form-control" id="aliData" rows="5"></textarea>
                                 </div>
-                                <div class="col-sm-3">
+                                <div class="col-sm-3"><div class="small alert alert-info">
                                     If the alignment is not provided, it will be parsed from .xy data
+                                    </div>
                                 </div>
                             </div>
                         </div>
