@@ -262,33 +262,27 @@ ContactMap.prototype._createCMap = function (data, id, svg, cellSize, colorCallb
 ContactMap.prototype._getTooltipText = function (r, c) {
     var cm1 = '', cm2 = '';
 
-//    if (this.data.seq1) {
-//        var res1 = this.data.seq1[r];
-//        var res2 = this.data.seq1[c];
-//        cm1 = 'CM1[' + res1 + (r + 1) + ':' + res2 + (c + 1) + ']';
-//    }
-//    if (this.data.seq2) {
-//        var res3 = this.data.seq2[r];
-//        var res4 = this.data.seq2[c];
-//        cm2 = 'CM2[' + res3 + (r + 1) + ':' + res4 + (c + 1) + ']';
-//    }
     var cm1data = this.data1.filter(d => (
             d.row === r && d.col === c)
             || (d.row === c && d.col === r)
     );
+
     if (cm1data[0]) {
         cm1 = 'CM1[' + cm1data[0].res1 + ':' + cm1data[0].res2 + ']';
     }
+
     var cm2data = this.data2.filter(d => (
             d.row === r && d.col === c)
             || (d.row === c && d.col === r)
     );
+
     if (cm2data[0]) {
         cm2 = 'CM2[' + cm2data[0].res1 + ':' + cm2data[0].res2 + ']';
     }
-    if (cm1.length > 0 || cm2.length > 0)
+
+    if (cm1.length > 0 && cm2.length > 0)
         return cm1 + ', ' + cm2;
-    else if (cm1.length === 0 || cm2.length === 0) {
+    else if (cm1.length === 0 && cm2.length === 0) {
         return 'Grid: [' + (r + 1) + ':' + (c + 1) + ']';
     } else {
         return cm1 + cm2;
