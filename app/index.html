@@ -130,16 +130,40 @@
         <script>
             var ContactMapViz;
 
-            function draw(error, results) {
+            function parseAlignment(alignment) {
+                if (alignment === null || alignment.trim().length === 0){
+                    return [null,null];
+                }
+                /**
+                 >>                 
+                 MRVTVSIIKADVFPGHAHVHPKMLEYAAAKLKEAQKRGVIIDYFVYLE...
+                 >   0.000e+00 >
+                 6 SIIKADV--FPGHAHVHPKMLEYAAAKLKEAQKRGVIIDYF...
+                 3 SIIKADVGGFPG---VHPKMLEYAAAKLKEAQKRGVIIDYF...
+                 */
+                var lines = alignment.split("\n");
+                var seq1 = lines[3].trim().split(" "),
+                    seq2 = lines[4].trim().split(" ");
+                return [seq1[1], seq2[1]];
+            }
+
+            function draw(error, matrix, alignment) {
                 if (error)
                     throw error;
+
+                var seq = parseAlignment(alignment)
+                var results = {matrix: matrix, seq1: seq[0], seq2: seq[1]};
+                $('#textData').val(matrix);
+                $('#aliData').val(alignment);
                 ContactMapViz.draw(results);
             }
 
             function drawData() {
                 console.log('drawing');
-                var data = $('#textData').val();
-                ContactMapViz.draw(data);
+                var data = $('#textData').val().trim();
+                var seq = parseAlignment($('#aliData').val());
+                var results = {matrix: data, seq1: seq[0], seq2: seq[1]};
+                ContactMapViz.draw(results);
             }
 
             function clearData() {
@@ -147,13 +171,14 @@
                 $('#textData').val("");
                 ContactMapViz.clear();
             }
-            
+
             function showExample(id) {
-                var file = "";
+                var file = "", ali = "";
                 switch (id) {
                     case 2:
                     {
                         file = './data/example/ex2/1btlA_.1dy6A_.xy';
+                        ali = './data/example/ex2/1btlA_.1dy6A_.ali';
                         break;
                         ;
                     }
@@ -161,11 +186,13 @@
                     default:
                     {
                         file = './data/example/ex1/d3t2ca_.d3t2fa_.xy';
+                        ali = './data/example/ex1/d3t2ca_.d3t2fa_.ali';
                         break;
                     }
                 }
                 d3.queue()
-                    .defer(d3.text, file)
+                    .defer(d3.text, file.trim())
+                    .defer(d3.text, ali)
                     .await(draw);
             }
 
@@ -200,13 +227,22 @@
                                     <label for="textData">Contact map (.xy) data</label>
                                     <textarea class="form-control" id="textData" rows="15"></textarea>
                                 </div>
-                                <div class="col-sm-2">
+                                <div class="col-sm-3">
                                     <button type="button" class="btn btn-secondary btn-sm mx-1" onclick="drawData()">Display</button>
 
                                     <button type="button" class="btn btn-secondary btn-sm mx-1" onclick="clearData();">Clear</button>
                                     <br />
                                     <button type="button" class="btn btn-link" onclick="showExample(1)">Example 1 (d3t2ca_.d3t2fa_)</button>
                                     <button type="button" class="btn btn-link" onclick="showExample(2)">Example 2 (1btlA_.1dy6A_)</button>
+                                </div>
+                            </div>
+                            <div class="row"> 
+                                <div class="col-sm-8">
+                                    <label for="aliData">Alignment (.ali) data</label>
+                                    <textarea class="form-control" id="aliData" rows="5"></textarea>
+                                </div>
+                                <div class="col-sm-3">
+                                    If the alignment is not provided, it will be parsed from .xy data
                                 </div>
                             </div>
                         </div>

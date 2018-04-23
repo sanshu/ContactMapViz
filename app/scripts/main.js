@@ -41,7 +41,9 @@ ContactMap.prototype.hideAlert = function () {
 };
 
 
-ContactMap.prototype._parse = function (data) {
+ContactMap.prototype._parse = function (json) {
+    var data = json.matrix;
+
 //    console.log(data);
     /*
      * column 1 is residue type and number for the 1-st residue in a contact
@@ -105,7 +107,7 @@ ContactMap.prototype._parse = function (data) {
             }
         }
 
-        return {max: max, matrix: dataArray, seq1: seq1, seq2: seq2, datasum: sumMatrix};
+        return {max: max, matrix: dataArray, seq1: json.seq1 || seq1, seq2: json.seq2 || seq2, datasum: sumMatrix};
     } catch (e) {
         console.log(e);
         this.alert('Wrong input format. Required format: [res1 gridX res2 gridY strustureId]');
@@ -113,11 +115,11 @@ ContactMap.prototype._parse = function (data) {
     }
 }
 
-ContactMap.prototype.draw = function (text) {
+ContactMap.prototype.draw = function (json) {
     this.clear();
     console.log('Cleared..');
 
-    if (text.trim().length === 0) {
+    if (json === null) {
         this.alert('Input data is empty.');
         return;
     }
@@ -128,7 +130,7 @@ ContactMap.prototype.draw = function (text) {
         - pleft - pright - 15; // little less than inner width of parent element
 
 
-    this.data = this._parse(text.trim());
+    this.data = this._parse(json);
     console.log(this.data);
     if (this.data !== null) {
         this._draw();
