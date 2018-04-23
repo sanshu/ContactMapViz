@@ -83,14 +83,12 @@ ContactMap.prototype._parse = function (json) {
 
             return {
                 id: i++,
-                structure: {
-                    res1: d[0],
-                    col: c, //grx
-                    res2: d[2],
-                    row: r, //gry
-                    structId: +d[4], //cont
-                    value: 1
-                }
+                res1: d[0],
+                col: c, //grx
+                res2: d[2],
+                row: r, //gry
+                structId: +d[4], //cont
+                value: 1
             };
         });
 //    console.log(max);
@@ -225,6 +223,8 @@ ContactMap.prototype._createCMap = function (data, id, svg, cellSize, colorCallb
         })
         .attr('width', cellSize)
         .attr('height', cellSize)
+//        .attr('data-grid-x', d => d.col)
+//        .attr('data-grid-y', d => d.row)
         .style('opacity', 0.7)
         .style('fill', colorCallback)
         .on('mouseover', function (d) {
@@ -262,19 +262,35 @@ ContactMap.prototype._createCMap = function (data, id, svg, cellSize, colorCallb
 ContactMap.prototype._getTooltipText = function (r, c) {
     var cm1 = '', cm2 = '';
 
-    if (this.data.seq1) {
-        var res1 = this.data.seq1[r];
-        var res2 = this.data.seq1[c];
-        cm1 = 'CM1[' + res1 + (r + 1) + ':' + res2 + (c + 1) + ']';
+//    if (this.data.seq1) {
+//        var res1 = this.data.seq1[r];
+//        var res2 = this.data.seq1[c];
+//        cm1 = 'CM1[' + res1 + (r + 1) + ':' + res2 + (c + 1) + ']';
+//    }
+//    if (this.data.seq2) {
+//        var res3 = this.data.seq2[r];
+//        var res4 = this.data.seq2[c];
+//        cm2 = 'CM2[' + res3 + (r + 1) + ':' + res4 + (c + 1) + ']';
+//    }
+    var cm1data = this.data1.filter(d => (
+            d.row === r && d.col === c)
+            || (d.row === c && d.col === r)
+    );
+    if (cm1data[0]) {
+        cm1 = 'CM1[' + cm1data[0].res1 + ':' + cm1data[0].res2 + ']';
     }
-    if (this.data.seq2) {
-        var res3 = this.data.seq2[r];
-        var res4 = this.data.seq2[c];
-        cm2 = 'CM2[' + res3 + (r + 1) + ':' + res4 + (c + 1) + ']';
+    var cm2data = this.data2.filter(d => (
+            d.row === r && d.col === c)
+            || (d.row === c && d.col === r)
+    );
+    if (cm2data[0]) {
+        cm2 = 'CM2[' + cm2data[0].res1 + ':' + cm2data[0].res2 + ']';
     }
     if (cm1.length > 0 || cm2.length > 0)
         return cm1 + ', ' + cm2;
-    else {
+    else if (cm1.length === 0 || cm2.length === 0) {
+        return 'Grid: [' + (r + 1) + ':' + (c + 1) + ']';
+    } else {
         return cm1 + cm2;
     }
 };
@@ -290,24 +306,16 @@ ContactMap.prototype._createTooltip = function (d, self) {
 
 ContactMap.prototype._draw = function () {
 
-    var data1 = this.data.matrix
-        .filter(d => d.structure.structId === 1 && d.structure.value > 0)
-        .map(d => {
-            return{row: d.structure.row, col: d.structure.col,
-                value: d.structure.value, id: d.id};
-        });
+    this.data1 = this.data.matrix
+        .filter(d => d.structId === 1 && d.value > 0);
     console.log('Data1: ');
-    console.log(data1);
+    console.log(this.data1);
 
-    var data2 = this.data.matrix
-        .filter(d => d.structure.structId === 2 && d.structure.value > 0)
-        .map(d => {
-            return{row: d.structure.row, col: d.structure.col,
-                value: d.structure.value, id: d.id};
-        });
+    this.data2 = this.data.matrix
+        .filter(d => d.structId === 2 && d.value > 0);
 
     console.log('Data2: ');
-    console.log(data2);
+    console.log(this.data2);
 
     var datasum = [];
     this.data.datasum.forEach(function (r, i) {
@@ -362,8 +370,7 @@ ContactMap.prototype._draw = function () {
         .attr('height', width + margin.top + margin.bottom);
 
     var viewShifted = svg.append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-        ;
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
     /////// GRID
     var xScale = d3.scaleLinear()
@@ -398,11 +405,11 @@ ContactMap.prototype._draw = function () {
 
     this._addSequences(view, cellSize);
 
-    this._createCMap(data1, 'cmap1', view, cellSize, function (d) {
+    this._createCMap(this.data1, 'cmap1', view, cellSize, function (d) {
         return '#007bff';
     });
 
-    this._createCMap(data2, 'cmap2', view, cellSize, function (d) {
+    this._createCMap(this.data2, 'cmap2', view, cellSize, function (d) {
         return '#ffc107';
     });
 
