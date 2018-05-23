@@ -137,8 +137,8 @@
             function showExample(id) {
                 // does not work locally, you have to run it on server to avoid CORS error
                 var file = "", ali = "";
-                file = './data/' + id + '.xy';
-                ali = './data/' + id + '.ali';
+                file = id + '.xy';
+                ali = id + '.ali';
 
                 d3.queue()
                     .defer(d3.text, file.trim())
@@ -146,9 +146,34 @@
                     .await(draw);
             }
 
+            /**
+             * JavaScript Get URL Parameter
+             * From https://www.kevinleary.net/javascript-get-url-parameters/
+             * 
+             * @param String prop The specific URL parameter you want to retreive the value for
+             * @return String|Object If prop is provided a string value is returned, otherwise an object of all properties is returned
+             */
+            function getUrlParams(prop) {
+                var params = {};
+                var search = decodeURIComponent(window.location.href.slice(window.location.href.indexOf('?') + 1));
+                var definitions = search.split('&');
+
+                definitions.forEach(function (val, key) {
+                    var parts = val.split('=', 2);
+                    params[ parts[ 0 ] ] = parts[ 1 ];
+                });
+
+                return (prop && prop in params) ? params[ prop ] : params;
+            }
+
             $(document).ready(function () {
+                var datapath = getUrlParams('path');
+                console.log(datapath);
                 ContactMapViz = new ContactMap("#cmContainer")
-                showExample('d3t2ca_.d3t2fa_');
+                if (! datapath)
+                    showExample('data/d3t2ca_.d3t2fa_');
+                else
+                    showExample(datapath);
             });
 
 
