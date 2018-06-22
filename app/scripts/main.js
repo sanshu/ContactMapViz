@@ -27,7 +27,7 @@ ContactMap.prototype.clear = function () {
     this.hideAlert();
     this._width = 0;
     this.data = null;
-    d3.select('svg').remove();
+    d3.select('#contactMaps').select('svg').remove();
     d3.select('#contactMaps').select('*').remove();
 };
 
