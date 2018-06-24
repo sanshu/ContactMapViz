@@ -167,6 +167,11 @@ gulp.task('publish', ['build'], () => {
   return gulp.src('dist/**/*').pipe(gulp.dest('docs/'));
 });
 
+
+gulp.task('seed', ['build'], () => {
+  return gulp.src('dist/**/*').pipe(gulp.dest('seed/'));
+});
+
 gulp.task('default', () => {
   return new Promise(resolve => {
     dev = false;

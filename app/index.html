@@ -1,30 +1,13 @@
 <!doctype html>
-<html class="no-js" lang="">
+<html class="no-js">
     <!-- @author Mayya Sedova <msedova.dev@gmail.com> -->
-
-    <head>
-        <meta charset="utf-8">
+    <!-- @repo https://github.com/sanshu/ContactMapViz> -->
+    <head><meta charset="utf-8">
         <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>ContactMapViz</title>
-
-        <link rel="apple-touch-icon" href="apple-touch-icon.png">
-        <!-- Place favicon.ico in the root directory -->
-
-        <!-- build:css styles/vendor.css -->
-        <!-- bower:css -->
-        <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.css" />
-        <!-- endbower -->
-        <!-- endbuild -->
-
-        <!-- build:css styles/main.css -->
-        <link rel="stylesheet" href="styles/main.css">
-        <!-- endbuild -->
-
-        <!-- build:js scripts/vendor/modernizr.js -->
-        <script src="/bower_components/jquery/dist/jquery.min.js"></script>
-        <script src="/bower_components/modernizr/modernizr.js"></script>
-        <!-- endbuild -->
+        <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+        <title>ContactMapViz</title><link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <link rel="stylesheet" href="styles/vendor.css"><link rel="stylesheet" href="styles/main.css">
+        <script src="scripts/vendor/modernizr.js"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <style>
 
@@ -153,149 +136,67 @@
 
                 var seq = parseAlignment(alignment)
                 var results = {matrix: matrix, seq1: seq[0], seq2: seq[1]};
-                $('#textData').val(matrix);
-                $('#aliData').val(alignment);
                 ContactMapViz.draw(results);
-            }
-
-            function drawData() {
-                console.log('drawing');
-                var data = $('#textData').val().trim();
-                var seq = parseAlignment($('#aliData').val());
-                var results = {matrix: data, seq1: seq[0], seq2: seq[1]};
-                ContactMapViz.draw(results);
-            }
-
-            function clearData() {
-                console.log("clearing...");
-                $('#textData').val("");
-                $('#aliData').val("");
-                ContactMapViz.clear();
             }
 
             function showExample(id) {
+                // does not work locally, you have to run it on server to avoid CORS error
                 var file = "", ali = "";
-                switch (id) {
-                    case 2:
-                    {
-                        file = './data/example/ex2/1btlA_.1dy6A_.xy';
-                        ali = './data/example/ex2/1btlA_.1dy6A_.ali';
-                        break;
-                        ;
-                    }
-                    case 1:
-                    default:
-                    {
-                        file = './data/example/ex1/d3t2ca_.d3t2fa_.xy';
-                        ali = './data/example/ex1/d3t2ca_.d3t2fa_.ali';
-                        break;
-                    }
-                }
+                file = id + '.xy';
+                ali = id + '.txt.mu.fixed';
+
                 d3.queue()
                     .defer(d3.text, file.trim())
                     .defer(d3.text, ali)
                     .await(draw);
             }
 
+            /**
+             * JavaScript Get URL Parameter
+             * From https://www.kevinleary.net/javascript-get-url-parameters/
+             * 
+             * @param String prop The specific URL parameter you want to retreive the value for
+             * @return String|Object If prop is provided a string value is returned, otherwise an object of all properties is returned
+             */
+            function getUrlParams(prop) {
+                var params = {};
+                var search = decodeURIComponent(window.location.href.slice(window.location.href.indexOf('?') + 1));
+                var definitions = search.split('&');
+
+                definitions.forEach(function (val, key) {
+                    var parts = val.split('=', 2);
+                    params[ parts[ 0 ] ] = parts[ 1 ];
+                });
+
+                return (prop && prop in params) ? params[ prop ] : params;
+            }
+
             $(document).ready(function () {
+                var datapath = getUrlParams('path');
+                console.log(datapath);
                 ContactMapViz = new ContactMap("#cmContainer")
-                showExample(1);
+                if (! datapath)
+                    showExample('data/d3t2ca_.d3t2fa_');
+                else
+                    showExample(datapath);
             });
 
 
         </script> 
     </head>
+
     <body>
         <!--[if IE]>
-          <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-
+         <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+       <![endif]-->
         <div class="container-fluid" >
             <div class="header">                
                 <h3 class="text-muted">ContactMapViz</h3>
-            </div>
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="card">
-                        <div class="card-header" id="headingOne">
-                            <h5 class="mb-0">
-                                 <a class="btn btn-dark" data-toggle="collapse" href="#collapse" role="button" aria-expanded="false" aria-controls="collapse">Enter data</a>
-                            </h5>
-                    </div>
-                        <div class="card-body collapse multi-collapse" id="collapse">
-                            <div class="row">                               
-                                <div class="col-sm-8">
-                                    <label for="textData">Contact map (.xy) data</label>
-                                    <textarea class="form-control" id="textData" rows="15"></textarea>
-                                </div>
-                                <div class="col-sm-3">
-                                    <button type="button" class="btn btn-secondary btn-sm mx-1" onclick="drawData()">Display</button>
-
-                                    <button type="button" class="btn btn-secondary btn-sm mx-1" onclick="clearData();">Clear</button>
-                                    <br />
-                                    <button type="button" class="btn btn-link" onclick="showExample(1)">Example 1 (d3t2ca_.d3t2fa_)</button>
-                                    <button type="button" class="btn btn-link" onclick="showExample(2)">Example 2 (1btlA_.1dy6A_)</button>
-
-                                    <div class="small alert alert-info">
-                                        *.xy file is now a simple list:<br>
-                                        <ul><li>
-                                                column 1 is residue type and number for the 1-st residue in a contact</li>
-                                            <li>
-                                                column 2 is the x coordinate for this contact on the graph</li>
-                                            <li>
-                                                column 3 is residue type and number for the 2nd residue in a contact</li>
-                                            <li>
-                                                column 4 is the y coordinate for this contact on the graph</li>
-                                            <li>
-                                                column 5 is structure number (1 or 2)</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row"> 
-                                <div class="col-sm-8">
-                                    <label for="aliData">Alignment (.ali) data</label>
-                                    <textarea class="form-control" id="aliData" rows="5"></textarea>
-                                </div>
-<!--                                <div class="col-sm-3"><div class="small alert alert-info">
-                                    If the alignment is not provided, it will be parsed from .xy data
-                                    </div>
-                                </div>-->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            </div> 
             <div class="row marketing" id='cmContainer'>
             </div>
-        </div>
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
-        <script>
-            (function (b, o, i, l, e, r) {
-                b.GoogleAnalyticsObject = l;
-                b[l] || (b[l] =
-                    function () {
-                        (b[l].q = b[l].q || []).push(arguments)
-                    });
-                b[l].l = +new Date;
-                e = o.createElement(i);
-                r = o.getElementsByTagName(i)[0];
-                e.src = 'https://www.google-analytics.com/analytics.js';
-                r.parentNode.insertBefore(e, r)
-            }(window, document, 'script', 'ga'));
-            ga('create', 'UA-XXXXX-X');
-            ga('send', 'pageview');
-        </script>
-
-        <!-- build:js scripts/vendor.js -->
-        <!-- bower:js -->
-        <script src="/bower_components/modernizr/modernizr.js"></script>
-        <!-- endbower -->
-        <!-- endbuild -->
-
-        <!-- build:js scripts/plugins.js -->
-        <script src="/bower_components/bootstrap/dist/js/bootstrap.bundle.js" type="text/javascript"></script>
-        <!-- endbuild -->
+        </div>        
+        <script src="scripts/vendor.js"></script>
+        <script src="scripts/plugins.js"></script>
     </body>
 </html>

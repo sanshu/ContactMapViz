@@ -9,11 +9,11 @@ function ContactMap(parentId) {
 }
 
 ContactMap.prototype.buttonsHTML = '<div class="col-6">' +
-    '<button type="button" class="btn btn-outline-primary btn-sm active mx-1"' +
+    '<button type="button" class="btn btn-info btn-outline-primary btn-sm active mx-1"' +
     'data-toggle="button" onclick="toggle(\'cmap1\')">First</button>' +
-    '<button type="button" class="btn btn-outline-warning btn-sm active mx-1" ' +
+    '<button type="button" class="btn btn-warning btn-outline-warning btn-sm active mx-1" ' +
     ' data-toggle="button" onclick="toggle(\'cmap2\')">Second</button>' +
-    '<button type="button" class="btn btn-outline-danger btn-sm active mx-1" ' +
+    '<button type="button" class="btn btn-danger btn-outline-danger btn-sm active mx-1" ' +
     ' data-toggle="button" onclick="toggle(\'cmapsum\')">Difference</button>' +
     '</div>';
 ContactMap.prototype.alertHTML = '<div class="alert alert-light col-6" role="alert" ' +
