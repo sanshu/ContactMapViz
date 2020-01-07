@@ -132,7 +132,7 @@
 
         <script>
                     var ContactMapViz;
-
+                   
                     function parseAlignment(alignment) {
                         if (alignment === null || alignment.trim().length === 0) {
                             return [null, null];
@@ -200,8 +200,15 @@
                             .await(draw);
                     }
 
+ 
+                    function exampleClickFunction(d){
+                        console.log("Example of click on contact: ");
+                        console.log(d);
+                    }
+
                     $(document).ready(function () {
                         ContactMapViz = new ContactMap("#cmContainer")
+                        ContactMapViz.onContactClick(exampleClickFunction);
                         showExample(1);
                     });
 
