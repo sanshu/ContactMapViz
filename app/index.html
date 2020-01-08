@@ -202,8 +202,8 @@
 
  
                     function exampleClickFunction(d){
-                        console.log("Example of click on contact: ");
-                        console.log(d);
+                        alert("You clicked on [" +d.row + ":" + d.col+"]");
+                        console.info(d);
                     }
 
                     $(document).ready(function () {

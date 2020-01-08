@@ -95,7 +95,7 @@ ContactMap.prototype._parse = function (json) {
 //
         return {max: max, matrix: dataArray, seq1: json.seq1, seq2: json.seq2, datasum: sumMatrix};
     } catch (e) {
-        console.log(e);
+        console.error(e);
         this.alert('Wrong input format. Required format: [res1 gridX res2 gridY strustureId]');
         return null;
     }
@@ -103,7 +103,7 @@ ContactMap.prototype._parse = function (json) {
 
 ContactMap.prototype.draw = function (json) {
     this.clear();
-    console.log('Cleared..');
+    console.log('CM Cleared..');
 
     if (json === null) {
         this.alert('Input data is empty.');
@@ -117,7 +117,7 @@ ContactMap.prototype.draw = function (json) {
 
 
     this.data = this._parse(json);
-    console.log(this.data);
+//    console.log(this.data);
     if (this.data !== null) {
         this._draw();
     }
@@ -308,14 +308,14 @@ ContactMap.prototype._draw = function () {
 
     this.data1 = this.data.matrix
             .filter(d => d.structId === 1 && d.value > 0);
-    console.log('Data1: ');
-    console.log(this.data1);
+//    console.log('Data1: ');
+//    console.log(this.data1);
 
     this.data2 = this.data.matrix
             .filter(d => d.structId === 2 && d.value > 0);
 
-    console.log('Data2: ');
-    console.log(this.data2);
+//    console.log('Data2: ');
+//    console.log(this.data2);
 
     var datasum = [];
     this.data.datasum.forEach(function (r, i) {
@@ -328,8 +328,8 @@ ContactMap.prototype._draw = function () {
     }
     );
 
-    console.log('Datasum: ');
-    console.log(datasum);
+//    console.log('Datasum: ');
+//    console.log(datasum);
 
 
     this.alert(`There are ${datasum.length} non-matching contacts.`);
@@ -439,20 +439,19 @@ ContactMap.prototype._draw = function () {
 };
 
 ContactMap.prototype._contactClicked = function (d) {
-    // d is the data point, has ro and col property
-    console.log(d);
+    // d is the data point, has row and col property
     this._processContactClick(d);
 };
 
 ContactMap.prototype._processContactClick = function (d) {
-    console.log("clicked");
+    console.log('clicked');
 };
 
 ContactMap.prototype.onContactClick = function (callback) {
-    if (typeof callback === "function") {
+    if (typeof callback === 'function') {
         this._processContactClick = callback;
     } else {
-        console.error("Callback is not a function!")
+        console.error('Callback is not a function!')
     }
 }
 
