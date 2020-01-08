@@ -265,6 +265,34 @@ ContactMap.prototype._createCMap = function (data, id, svg, cellSize, colorCallb
 
 };
 
+
+ContactMap.prototype.getResiduesAt = function (r, c) {
+    var cm1 = '', cm2 = '', result = {};
+
+    var cm1data = this.data1.filter(d => (
+                d.row === r && d.col === c)
+                || (d.row === c && d.col === r)
+    );
+
+    if (cm1data[0]) {
+        result.cm1 = {};
+        result.cm1.res1 = cm1data[0].res1;
+        result.cm1.res2 = cm1data[0].res2;
+    }
+
+    var cm2data = this.data2.filter(d => (
+                d.row === r && d.col === c)
+                || (d.row === c && d.col === r)
+    );
+
+    if (cm2data[0]) {
+        result.cm2 = {};
+        result.cm2.res1 = cm2data[0].res1;
+        result.cm2.res2 = cm2data[0].res2;
+    }
+    return result;
+};
+
 ContactMap.prototype._getTooltipText = function (r, c) {
     var cm1 = '', cm2 = '';
 
@@ -440,6 +468,8 @@ ContactMap.prototype._draw = function () {
 
 ContactMap.prototype._contactClicked = function (d) {
     // d is the data point, has row and col property
+    let residues = this.getResiduesAt(d.row, d.col);
+    d.residues = residues;
     this._processContactClick(d);
 };
 
