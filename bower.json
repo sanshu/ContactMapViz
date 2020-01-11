@@ -2,18 +2,8 @@
   "name": "contactmapviz",
   "private": true,
   "dependencies": {
-    "bootstrap": "~4.0.0",
-    "modernizr": "~2.8.1"
   },
   "overrides": {
-    "bootstrap": {
-      "main": [
-        "less/bootstrap.less",
-        "dist/css/bootstrap.css",
-        "dist/js/bootstrap.js",
-        "dist/fonts/*"
-      ]
-    }
   },
   "devDependencies": {
     "chai": "^4.1.2",
