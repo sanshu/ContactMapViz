@@ -213,10 +213,10 @@ ContactMap.prototype._createCMap = function (data, id, svg, cellSize, colorCallb
     enterSelection
             .append('rect')
             .attr('x', function (d) {
-                return d.col * cellSize;
+                return (d.col-1) * cellSize;
             })
             .attr('y', function (d) {
-                return d.row * cellSize;
+                return (d.row-1) * cellSize;
             })
             .attr('class', function (d) {
                 return 'cell cell-border cr' + (d.row - 1) + ' cc' + (d.col - 1);
@@ -240,10 +240,10 @@ ContactMap.prototype._createCMap = function (data, id, svg, cellSize, colorCallb
     // add mirrored element
     enterSelection.insert('rect')
             .attr('y', function (d) {
-                return d.col * cellSize;
+                return (d.col-1) * cellSize;
             })
             .attr('x', function (d) {
-                return d.row * cellSize;
+                return (d.row-1) * cellSize;
             })
             .attr('class', function (d) {
                 return 'cell cell-border cr' + (d.row - 1) + ' cc' + (d.col - 1);
