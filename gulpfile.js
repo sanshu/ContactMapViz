@@ -5,10 +5,11 @@ const browserSync = require('browser-sync').create();
 const del = require('del');
 const wiredep = require('wiredep').stream;
 const runSequence = require('run-sequence');
-const rename = require("gulp-rename");
+const rename = require('gulp-rename');
 const replace = require('gulp-replace-string');
 const replaceName = require('gulp-replace-name');
 
+const uglify = require('gulp-uglify-es').default;
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -54,7 +55,7 @@ gulp.task('lint:test', () => {
 gulp.task('html', ['styles', 'scripts'], () => {
     return gulp.src('app/*.html')
         .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
-        .pipe($.if(/\.js$/, $.uglify({compress: {drop_console: false}})))
+        .pipe($.if(/\.js$/, uglify({compress: {drop_console: false}})))
         .pipe($.if(/\ContactMapViz.js$/, rename({suffix: '.min'})))
 //        .pipe(replaceName(/\.js/g, '.min.js'))
         .pipe($.if(/\.css$/, $.cssnano({safe: true, autoprefixer: false})))
