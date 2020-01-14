@@ -9,19 +9,21 @@ function ContactMap(parentId) {
 }
 
 ContactMap.prototype.buttonsHTML = '<div class="col-6">' +
-        '<button type="button" class="btn btn-info btn-outline-primary btn-sm active mx-1"' +
-        'data-toggle="button" onclick="toggle(\'cmap1\')">First</button>' +
-        '<button type="button" class="btn btn-warning btn-outline-warning btn-sm active mx-1" ' +
-        ' data-toggle="button" onclick="toggle(\'cmap2\')">Second</button>' +
-        '<button type="button" class="btn btn-danger btn-outline-danger btn-sm active mx-1" ' +
-        ' data-toggle="button" onclick="toggle(\'cmapsum\')">Difference</button>' +
-        '</div>';
+    '<button type="button" class="btn btn-info btn-outline-primary btn-sm active mx-1"' +
+    'data-toggle="button" onclick="toggle(\'cmap1\')">First</button>' +
+    '<button type="button" class="btn btn-warning btn-outline-warning btn-sm active mx-1" ' +
+    ' data-toggle="button" onclick="toggle(\'cmap2\')">Second</button>' +
+    '<button type="button" class="btn btn-danger btn-outline-danger btn-sm active mx-1" ' +
+    ' data-toggle="button" onclick="toggle(\'cmapsum\')">Difference</button>' +
+    '</div>';
 ContactMap.prototype.alertHTML = '<div class="alert alert-light col-6" role="alert" ' +
-        'id="alertbox">&nbsp;</div>'
+    'id="alertbox">&nbsp;</div>'
 ContactMap.prototype.cmHTML = '<div class="row"><div class="col-12"><div id="contactMaps"></div></div>';
 ContactMap.prototype.tooltipHTML = '<div id="tooltip" class="hidden">' +
-        '<p><span id="value"></p>' +
-        '</div></div>';
+    '<p><span id="value"></p>' +
+    '</div></div>';
+
+ContactMap.prototype.ccellSize = 1; // calculated cell size for public use
 
 ContactMap.prototype.clear = function () {
     this.hideAlert();
@@ -44,7 +46,7 @@ ContactMap.prototype.hideAlert = function () {
 ContactMap.prototype._parse = function (json) {
     var data = json.matrix;
 
-//    console.log(data);
+    //    console.log(data);
     /*
      * column 1 is residue type and number for the 1-st residue in a contact
      column 2 is the x coordinate for this contact on the graph
@@ -91,9 +93,9 @@ ContactMap.prototype._parse = function (json) {
                 value: 1
             };
         });
-//    console.log(max);
-//
-        return {max: max, matrix: dataArray, seq1: json.seq1, seq2: json.seq2, datasum: sumMatrix};
+        //    console.log(max);
+        //
+        return { max: max, matrix: dataArray, seq1: json.seq1, seq2: json.seq2, datasum: sumMatrix };
     } catch (e) {
         console.error(e);
         this.alert('Wrong input format. Required format: [res1 gridX res2 gridY strustureId]');
@@ -111,13 +113,13 @@ ContactMap.prototype.draw = function (json) {
     }
 
     var pleft = parseInt(d3.select(this._parentId).style('padding-left')),
-            pright = parseInt(d3.select(this._parentId).style('padding-right'));
+        pright = parseInt(d3.select(this._parentId).style('padding-right'));
     this._width = parseInt(d3.select(this._parentId).style('width'))
-            - pleft - pright - 15; // little less than inner width of parent element
+        - pleft - pright - 15; // little less than inner width of parent element
 
 
     this.data = this._parse(json);
-//    console.log(this.data);
+    //    console.log(this.data);
     if (this.data !== null) {
         this._draw();
     }
@@ -128,139 +130,137 @@ ContactMap.prototype._addSequences = function (svg, cellSize) {
 
     if (this.data.seq1) {
         var enterSelection = svg.append('g').attr('class', 'g3')
-                .attr('id', 'sequences1')
-                .attr('text-anchor', 'middle')
-                .attr('alignment-baseline', 'middle')
-                .attr('font-size', cellSize * 1.2)
-                .selectAll('.seq')
-                .data(this.data.seq1, function (d) {
-                    return d;   /// ????
-                })
-                .enter();
+            .attr('id', 'sequences1')
+            .attr('text-anchor', 'middle')
+            .attr('alignment-baseline', 'middle')
+            .attr('font-size', cellSize * 1.2)
+            .selectAll('.seq')
+            .data(this.data.seq1, function (d) {
+                return d;   /// ????
+            })
+            .enter();
 
 
         // 1st sequence
         enterSelection.append('text')
-                .attr('dx', function (d, i) {
-                    return (i + 0.5) * cellSize;
-                })
-                .attr('dy', function (d) {
-                    return -cellSize * 3;
-                })
-                .text(function (d, i) {
-                    return d;
-                });
+            .attr('dx', function (d, i) {
+                return (i + 0.5) * cellSize;
+            })
+            .attr('dy', function (d) {
+                return -cellSize * 3;
+            })
+            .text(function (d, i) {
+                return d;
+            });
 
         //vertical
         enterSelection.append('text')
-                .attr('dy', function (d, i) {
-                    return (i + 1) * cellSize;
-                })
-                .attr('dx', function (d) {
-                    return -cellSize * 3;
-                })
-                .text(function (d, i) {
-                    return d;
-                });
+            .attr('dy', function (d, i) {
+                return (i + 1) * cellSize;
+            })
+            .attr('dx', function (d) {
+                return -cellSize * 3;
+            })
+            .text(function (d, i) {
+                return d;
+            });
     }
 
     if (this.data.seq2) {
         enterSelection = svg.append('g').attr('class', 'g3')
-                .attr('id', 'sequences2')
-                .attr('text-anchor', 'middle')
-                .attr('alignment-baseline', 'middle')
-                .attr('font-size', cellSize * 1.2)
-                .selectAll('.seq')
-                .data(this.data.seq2, function (d) {
-                    return d;   /// ????
-                })
-                .enter();
+            .attr('id', 'sequences2')
+            .attr('text-anchor', 'middle')
+            .attr('alignment-baseline', 'middle')
+            .attr('font-size', cellSize * 1.2)
+            .selectAll('.seq')
+            .data(this.data.seq2, function (d) {
+                return d;   /// ????
+            })
+            .enter();
 
         enterSelection.append('text')
-                .attr('dx', function (d, i) {
-                    return (i + 0.5) * cellSize;
-                })
-                .attr('dy', function (d) {
-                    return -cellSize;
-                })
-                .text(function (d) {
-                    return d;
-                });
+            .attr('dx', function (d, i) {
+                return (i + 0.5) * cellSize;
+            })
+            .attr('dy', function (d) {
+                return -cellSize;
+            })
+            .text(function (d) {
+                return d;
+            });
 
         //vertical
         enterSelection.append('text')
-                .attr('dy', function (d, i) {
-                    return (i + 1) * cellSize;
-                })
-                .attr('dx', function (d) {
-                    return -cellSize;
-                })
-                .text(function (d, i) {
-                    return d;
-                });
+            .attr('dy', function (d, i) {
+                return (i + 1) * cellSize;
+            })
+            .attr('dx', function (d) {
+                return -cellSize;
+            })
+            .text(function (d, i) {
+                return d;
+            });
     }
 };
 
 ContactMap.prototype._createCMap = function (data, id, svg, cellSize, colorCallback) {
     const self = this;
     var enterSelection = svg.append('g').attr('class', 'g3').attr('id', id)
-            .selectAll('.cellg')
-            .data(data, function (d) {
-                return d.row + ':' + d.col;  /// ???? why?
-            })
-            .enter();
+        .selectAll('.cellg')
+        .data(data, function (d) {
+            return d.row + ':' + d.col;  /// ???? why?
+        })
+        .enter();
 
     enterSelection
-            .append('rect')
-            .attr('x', function (d) {
-                return (d.col-1) * cellSize;
-            })
-            .attr('y', function (d) {
-                return (d.row-1) * cellSize;
-            })
-            .attr('class', function (d) {
-                return 'cell cell-border cr' + (d.row - 1) + ' cc' + (d.col - 1);
-            })
-            .attr('width', cellSize)
-            .attr('height', cellSize)
-//        .attr('data-grid-x', d => d.col)
-//        .attr('data-grid-y', d => d.row)
-            .style('opacity', 0.7)
-            .style('fill', colorCallback)
-            .on('mouseover', function (d) {
-                self._createTooltip(d, self);
-            })
-            .on('mouseout', function () {
-                d3.select('#tooltip').classed('hidden', true);
-            })
-            .on('click', function (d) {
-                self._contactClicked(d);
-            });
+        .append('rect')
+        .attr('x', function (d) {
+            return (d.col - 1) * cellSize;
+        })
+        .attr('y', function (d) {
+            return (d.row - 1) * cellSize;
+        })
+        .attr('class', function (d) {
+            return 'cell cell-border cr' + (d.row - 1) + ' cc' + (d.col - 1);
+        })
+        .attr('width', cellSize)
+        .attr('height', cellSize)
+        .style('opacity', 0.7)
+        .style('fill', colorCallback)
+        .on('mouseover', function (d) {
+            self._createTooltip(d, self);
+        })
+        .on('mouseout', function () {
+            d3.select('#tooltip').classed('hidden', true);
+        })
+        .on('click', function (d) {
+            self._contactClicked(d);
+        });
 
     // add mirrored element
     enterSelection.insert('rect')
-            .attr('y', function (d) {
-                return (d.col-1) * cellSize;
-            })
-            .attr('x', function (d) {
-                return (d.row-1) * cellSize;
-            })
-            .attr('class', function (d) {
-                return 'cell cell-border cr' + (d.row - 1) + ' cc' + (d.col - 1);
-            })
-            .attr('width', cellSize)
-            .attr('height', cellSize)
-            .style('opacity', 0.7)
-            .style('fill', colorCallback)
-            .on('mouseover', function (d) {
-                self._createTooltip(d, self);
-            })
-            .on('mouseout', function () {
-                d3.select('#tooltip').classed('hidden', true);
-            })
-            .on('click', function (d) {
-                self._contactClicked(d);
-            });
+        .attr('y', function (d) {
+            return (d.col - 1) * cellSize;
+        })
+        .attr('x', function (d) {
+            return (d.row - 1) * cellSize;
+        })
+        .attr('class', function (d) {
+            return 'cell cell-border cr' + (d.row - 1) + ' cc' + (d.col - 1);
+        })
+        .attr('width', cellSize)
+        .attr('height', cellSize)
+        .style('opacity', 0.7)
+        .style('fill', colorCallback)
+        .on('mouseover', function (d) {
+            self._createTooltip(d, self);
+        })
+        .on('mouseout', function () {
+            d3.select('#tooltip').classed('hidden', true);
+        })
+        .on('click', function (d) {
+            self._contactClicked(d);
+        });
     ;
 
 };
@@ -270,8 +270,8 @@ ContactMap.prototype.getResiduesAt = function (r, c) {
     var cm1 = '', cm2 = '', result = {};
 
     var cm1data = this.data1.filter(d => (
-                d.row === r && d.col === c)
-                || (d.row === c && d.col === r)
+        d.row === r && d.col === c)
+        || (d.row === c && d.col === r)
     );
 
     if (cm1data[0]) {
@@ -281,8 +281,8 @@ ContactMap.prototype.getResiduesAt = function (r, c) {
     }
 
     var cm2data = this.data2.filter(d => (
-                d.row === r && d.col === c)
-                || (d.row === c && d.col === r)
+        d.row === r && d.col === c)
+        || (d.row === c && d.col === r)
     );
 
     if (cm2data[0]) {
@@ -297,8 +297,8 @@ ContactMap.prototype._getTooltipText = function (r, c) {
     var cm1 = '', cm2 = '';
 
     var cm1data = this.data1.filter(d => (
-                d.row === r && d.col === c)
-                || (d.row === c && d.col === r)
+        d.row === r && d.col === c)
+        || (d.row === c && d.col === r)
     );
 
     if (cm1data[0]) {
@@ -306,8 +306,8 @@ ContactMap.prototype._getTooltipText = function (r, c) {
     }
 
     var cm2data = this.data2.filter(d => (
-                d.row === r && d.col === c)
-                || (d.row === c && d.col === r)
+        d.row === r && d.col === c)
+        || (d.row === c && d.col === r)
     );
 
     if (cm2data[0]) {
@@ -325,111 +325,114 @@ ContactMap.prototype._getTooltipText = function (r, c) {
 
 ContactMap.prototype._createTooltip = function (d, self) {
     d3.select('#tooltip')
-            .style('left', (d3.event.pageX + 10) + 'px')
-            .style('top', (d3.event.pageY - 10) + 'px')
-            .select('#value')
-            .text(self._getTooltipText(d.row, d.col));
+        .style('left', (d3.event.pageX + 10) + 'px')
+        .style('top', (d3.event.pageY - 10) + 'px')
+        .select('#value')
+        .text(self._getTooltipText(d.row, d.col));
     d3.select('#tooltip').classed('hidden', false);
 };
 
 ContactMap.prototype._draw = function () {
 
     this.data1 = this.data.matrix
-            .filter(d => d.structId === 1 && d.value > 0);
-//    console.log('Data1: ');
-//    console.log(this.data1);
+        .filter(d => d.structId === 1 && d.value > 0);
+    //    console.log('Data1: ');
+    //    console.log(this.data1);
 
     this.data2 = this.data.matrix
-            .filter(d => d.structId === 2 && d.value > 0);
+        .filter(d => d.structId === 2 && d.value > 0);
 
-//    console.log('Data2: ');
-//    console.log(this.data2);
+    //    console.log('Data2: ');
+    //    console.log(this.data2);
 
     var datasum = [];
     this.data.datasum.forEach(function (r, i) {
         r.forEach(function (c, j) {
             if (c !== 0) {
-                datasum.push({row: i, col: j,
-                    value: c})
+                datasum.push({
+                    row: i, col: j,
+                    value: c
+                })
             }
         });
     }
     );
 
-//    console.log('Datasum: ');
-//    console.log(datasum);
+    //    console.log('Datasum: ');
+    //    console.log(datasum);
 
 
     this.alert(`There are ${datasum.length} non-matching contacts.`);
 
     var outerwidth = this._width || 400,
-            cols = this.data.max,
-            rows = cols,
-            margin = {top: 50, right: 20, bottom: 20, left: 50},
-            innerWidth = outerwidth - margin.left - margin.right,
-            cellSize = innerWidth / cols,
-            width = innerWidth,
-            height = innerWidth,
-            currentTransform = null;
+        cols = this.data.max,
+        rows = cols,
+        margin = { top: 50, right: 20, bottom: 20, left: 50 },
+        innerWidth = outerwidth - margin.left - margin.right,
+        cellSize = innerWidth / cols,
+        width = innerWidth,
+        height = innerWidth,
+        currentTransform = null;
 
+    this.ccellSize = cellSize; // TODO: refactor to use this instead of function param    
     var zoom = d3.zoom()
-            .scaleExtent([.75, 5])
-            .translateExtent([
-                [-20, -20],
-                [width + 40, height + 40]
-            ])
-            .on('zoom', zoomed);
+        .scaleExtent([.75, 5])
+        .translateExtent([
+            [-20, -20],
+            [width + 40, height + 40]
+        ])
+        .on('zoom', zoomed);
 
-// add slider instead of mousewheel zoom to improve user experience
-// have it start at min 50% and max out at 5x the amount.
-// you'll also have to add slider.attr('value', d3.event.scale) in the zoom method to update slider
+    // add slider instead of mousewheel zoom to improve user experience
+    // have it start at min 50% and max out at 5x the amount.
+    // you'll also have to add slider.attr('value', d3.event.scale) in the zoom method to update slider
     var slider = d3.select('#contactMaps').append('input')
-            .datum({})
-            .attr('type', 'range')
-            .attr('value', 1)
-            .attr('min', zoom.scaleExtent()[0])
-            .attr('max', zoom.scaleExtent()[1])
-            .attr('step', (zoom.scaleExtent()[1] - zoom.scaleExtent()[0]) / 100)
-            .on('input', slided);
+        .datum({})
+        .attr('type', 'range')
+        .attr('value', 1)
+        .attr('min', zoom.scaleExtent()[0])
+        .attr('max', zoom.scaleExtent()[1])
+        .attr('step', (zoom.scaleExtent()[1] - zoom.scaleExtent()[0]) / 100)
+        .on('input', slided);
 
 
     var svg = d3.select('#contactMaps').append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', width + margin.top + margin.bottom);
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', width + margin.top + margin.bottom);
 
     var viewShifted = svg.append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
     /////// GRID
     var xScale = d3.scaleLinear()
-            .domain([0, cols])
-            .range([0, width]);
+        .domain([0, cols])
+        .range([0, width]);
 
     var yScale = d3.scaleLinear()
-            .domain([0, rows])
-            .range([0, height]);
+        .domain([0, rows])
+        .range([0, height]);
 
     var xAxis = d3.axisBottom(xScale)
-            .ticks((width + 2) / (height + 2) * 10)
-            .tickSize(height)
-            .tickPadding(-8 - height);
+        .ticks((width + 2) / (height + 2) * 10)
+        .tickSize(height)
+        .tickPadding(-8 - height);
 
     var yAxis = d3.axisRight(yScale)
-            .ticks(10)
-            .tickSize(width)
-            .tickPadding(-width - 18);
+        .ticks(10)
+        .tickSize(width)
+        .tickPadding(-width - 18);
 
     var gX = viewShifted.append('g')
-            .attr('class', 'axis axis--x')
-            .call(xAxis);
+        .attr('class', 'axis axis--x')
+        .call(xAxis);
     var gY = viewShifted.append('g')
-            .attr('class', 'axis axis--y')
-            .call(yAxis);
+        .attr('class', 'axis axis--y')
+        .call(yAxis);
     //// END OF GRID
 
     ////  ZOOM
     var view = viewShifted.append('g')
-            .attr('class', 'view');
+        .attr('class', 'view');
 
     this._addSequences(view, cellSize);
 
@@ -442,13 +445,22 @@ ContactMap.prototype._draw = function () {
     });
 
     this._createCMap(datasum, 'cmapsum', view, cellSize, function (d) {
-        return  (d.value > 0) ? '#D50000' : '#28a745';
+        return (d.value > 0) ? '#D50000' : '#28a745';
     });
 
+    var hlights = view.append('g').attr('id', 'hlights');
+    d3.select('#hlights').append('circle').attr('id', 'hlight1')
+        .attr('cx', 0)
+        .attr('cy', 0)
+        .attr('r', 0);
+    d3.select('#hlights').append('circle').attr('id', 'hlight2')
+        .attr('cx', 0)
+        .attr('cy', 0)
+        .attr('r', 0);
 
     if (currentTransform)
         view.attr('transform', currentTransform);
-///---------
+    ///---------
 
     function zoomed() {
         currentTransform = d3.event.transform;
@@ -462,10 +474,40 @@ ContactMap.prototype._draw = function () {
     }
     // disable zoom on mousewheel and double click
     svg.call(zoom).on('wheel.zoom', null)
-            .on('dblclick.zoom', null);
+        .on('dblclick.zoom', null);
 
 };
 
+
+ContactMap.prototype.highlightContact = function (row, col, color = 'yellow', radius = 3) {
+    const r = radius * this.ccellSize;
+
+    const x = row ? (row - 0.5) * this.ccellSize : 0;
+    const y = col ? (col - 0.5) * this.ccellSize : 0;
+
+    d3.select('#hlights').select('#hlight1')
+        .attr('cx', x)
+        .attr('cy', y);
+
+    d3.select('#hlights').select('#hlight2')
+        .attr('cx', y)
+        .attr('cy', x);
+
+    d3.select('#hlights').selectAll('circle')
+        .attr('r', 0)
+        .attr('stroke', 'grey')
+        .attr('stroke-opacity', 1)
+        .attr('fill', color)
+        .attr('opacity', 0)
+        .transition()
+        .attr('r', r)
+        .transition()
+        .attr('opacity', 0.4);
+}
+
+ContactMap.prototype.removeHighlight = function () {
+    d3.select('#hlights').select('circle').attr('r', 0).attr('opacity', 0.3);
+}
 ContactMap.prototype._contactClicked = function (d) {
     // d is the data point, has row and col property
     let residues = this.getResiduesAt(d.row, d.col);

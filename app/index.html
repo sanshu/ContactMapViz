@@ -106,14 +106,17 @@
 
 
         function exampleClickFunction(d) {
+            ContactMapViz.removeHighlight();
             alert("You clicked on [" + d.row + ":" + d.col + "]");
             console.info(d);
+            ContactMapViz.highlightContact(d.row, d.col); // show highlighted contact
         }
 
         $(document).ready(function () {
             ContactMapViz = new ContactMap("#cmContainer")
             ContactMapViz.onContactClick(exampleClickFunction);
             showExample(1);
+           
         });
     </script>
 </head>
