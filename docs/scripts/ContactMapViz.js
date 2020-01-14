@@ -3,7 +3,7 @@
  */
 
 function ContactMap(parentId) {
-    d3.select(parentId).html('<div class="row px-3" style="width:100%">' + this.buttonsHTML + this.alertHTML + '</div>' + this.cmHTML + this.tooltipHTML);
+    d3.select(parentId).html('<div class="row px-3" id="cmControls" style="width:100%">' + this.buttonsHTML + this.alertHTML + '</div>' + this.cmHTML + this.tooltipHTML);
     this.hideAlert();
     this._parentId = parentId;
 }
@@ -528,7 +528,10 @@ ContactMap.prototype.onContactClick = function (callback) {
     }
 }
 
-
+ContactMap.prototype.toggleControls = function (on) {
+    on ? d3.select('#cmControls').attr('hidden', null)
+        : d3.select('#cmControls').attr('hidden', '');
+}
 
 function toggle(id) {
     $('#' + id).fadeToggle();
