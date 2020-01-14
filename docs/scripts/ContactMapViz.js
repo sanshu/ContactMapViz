@@ -367,7 +367,7 @@ ContactMap.prototype._draw = function () {
     var outerwidth = this._width || 400,
         cols = this.data.max,
         rows = cols,
-        margin = { top: 50, right: 20, bottom: 20, left: 50 },
+        margin = { top: 25, right: 20, bottom: 20, left: 20 },
         innerWidth = outerwidth - margin.left - margin.right,
         cellSize = innerWidth / cols,
         width = innerWidth,
@@ -376,10 +376,10 @@ ContactMap.prototype._draw = function () {
 
     this.ccellSize = cellSize; // TODO: refactor to use this instead of function param    
     var zoom = d3.zoom()
-        .scaleExtent([.75, 5])
+        .scaleExtent([1, 5])
         .translateExtent([
-            [-20, -20],
-            [width + 40, height + 40]
+            [-10, -12],
+            [width + 20, height + 20]
         ])
         .on('zoom', zoomed);
 
