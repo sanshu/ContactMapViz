@@ -535,7 +535,7 @@ ContactMap.prototype.highlightContact = function (row, col, color = 'yellow', ra
 }
 
 ContactMap.prototype.removeHighlight = function () {
-    d3.select('#hlights').select('circle').attr('r', 0).attr('opacity', 0);
+    d3.select('#hlights').selectAll('circle').attr('r', 0).attr('opacity', 0);
 }
 ContactMap.prototype._contactClicked = function (d) {
     // d is the data point, has row and col property
