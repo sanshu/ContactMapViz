@@ -472,10 +472,6 @@ ContactMap.prototype._draw = function () {
     function slided(d) {
         zoom.scaleTo(svg, d3.select(this).property('value'));
     }
-    // disable zoom on mousewheel and double click
-    svg.call(zoom).on('wheel.zoom', null)
-        .on('dblclick.zoom', null);
-
 };
 
 
@@ -498,16 +494,14 @@ ContactMap.prototype.highlightContact = function (row, col, color = 'yellow', ra
         .attr('r', 0)
         .attr('stroke', c)
         .attr('stroke-opacity', 1)
-        .attr('fill', color)
-        .attr('opacity', 0)
-        .transition()
-        .attr('r', r)
-        .transition()
-        .attr('opacity', 0.4);
+        .attr('fill', 'none')
+        .attr('opacity', 1)
+        .transition().duration(1000)
+        .attr('r', r);
 }
 
 ContactMap.prototype.removeHighlight = function () {
-    d3.select('#hlights').select('circle').attr('r', 0).attr('opacity', 0.3);
+    d3.select('#hlights').select('circle').attr('r', 0).attr('opacity', 0);
 }
 ContactMap.prototype._contactClicked = function (d) {
     // d is the data point, has row and col property
