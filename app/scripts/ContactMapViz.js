@@ -480,7 +480,6 @@ ContactMap.prototype.highlightContact = function (row, col, color = 'yellow', ra
 
     const x = row ? (row - 0.5) * this.ccellSize : 0;
     const y = col ? (col - 0.5) * this.ccellSize : 0;
-    const c = d3.color(color).darker();
 
     d3.select('#hlights').select('#hlight1')
         .attr('cx', x)
@@ -492,7 +491,7 @@ ContactMap.prototype.highlightContact = function (row, col, color = 'yellow', ra
 
     d3.select('#hlights').selectAll('circle')
         .attr('r', 0)
-        .attr('stroke', c)
+        .attr('stroke', color)
         .attr('stroke-opacity', 1)
         .attr('fill', 'none')
         .attr('opacity', 1)
