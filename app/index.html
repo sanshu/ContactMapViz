@@ -27,7 +27,7 @@
     <!-- build:css styles/ContactMapViz.css -->
     <link rel="stylesheet" href="styles/ContactMapViz.css">
     <!-- endbuild -->
-    
+
     <script src="https://d3js.org/d3.v4.min.js"></script>
 
     <!-- build:js scripts/ContactMapViz.js -->
@@ -113,10 +113,22 @@
         }
 
         $(document).ready(function () {
-            ContactMapViz = new ContactMap("#cmContainer")
+            const visualProperties = {
+                colors: {
+                    cmap1: 'blue', // button and map color
+                    cmapText1: 'white', // button text
+                    cmap2: 'orange',
+                    cmapText2: 'black', // button text
+                    positiveDiff: 'red', 
+                    negativeDiff: 'green',
+                    cmapTextDiff: 'white', // button text
+                }
+            };
+            ContactMapViz = new ContactMap("#cmContainer");
+            ContactMapViz.setVisualProps(visualProperties);
             ContactMapViz.onContactClick(exampleClickFunction);
             showExample(1);
-           
+
         });
     </script>
 </head>

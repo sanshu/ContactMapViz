@@ -6,22 +6,53 @@ function ContactMap(parentId) {
     d3.select(parentId).html('<div class="row px-3" id="cmControls" style="width:100%">' + this.buttonsHTML + this.alertHTML + '</div>' + this.cmHTML + this.tooltipHTML);
     this.hideAlert();
     this._parentId = parentId;
+    this.setVisualProps(this._defaultVisualProperties);
+}
+
+ContactMap.prototype._defaultVisualProperties = {
+    colors: {
+        cmap1: '#007bff',
+        cmapText1: 'white', // button text
+        cmap2: '#ffc107',
+        cmapText2: 'black', // button text
+        positiveDiff: 'dc3545',
+        negativeDiff: 'green',
+        cmapTextDiff: 'white', // button text
+    }
+};
+ContactMap.prototype.visualProperties = {};
+
+ContactMap.prototype.setVisualProps = function (newProps) {
+    // let merged = { ...this._defaultVisualProperties, ...newProps };
+    const merged = Object.assign(this._defaultVisualProperties, newProps );
+    console.log(merged)
+    this.visualProperties = merged;
+    
+    const colors = this.visualProperties.colors;
+    applyBtnColor('cmap-btn-1', colors.cmap1, colors.cmapText1);
+    applyBtnColor('cmap-btn-2', colors.cmap2, colors.cmapText2);
+    applyBtnColor('cmap-btn-diff', colors.positiveDiff, colors.cmapTextDiff);
+
+    function applyBtnColor(id, color, textColor){
+        const style='color:'+textColor+';background-color:'+color+';border-color:' +color;
+        d3.select('#'+id)
+        .attr('style', style);
+    }
 }
 
 ContactMap.prototype.buttonsHTML = '<div class="col-6">' +
-    '<button type="button" class="btn btn-info btn-outline-primary btn-sm active mx-1"' +
+    '<button type="button" id="cmap-btn-1" class="btn btn-outline btn-sm active mx-1"' +
     'data-toggle="button" onclick="toggle(\'cmap1\')">First</button>' +
-    '<button type="button" class="btn btn-warning btn-outline-warning btn-sm active mx-1" ' +
+    '<button type="button" id="cmap-btn-2" class="btn btn-sm active mx-1" ' +
     ' data-toggle="button" onclick="toggle(\'cmap2\')">Second</button>' +
-    '<button type="button" class="btn btn-danger btn-outline-danger btn-sm active mx-1" ' +
+    '<button type="button" id="cmap-btn-diff" class="btn btn-sm active mx-1" ' +
     ' data-toggle="button" onclick="toggle(\'cmapsum\')">Difference</button>' +
     '</div>';
 ContactMap.prototype.alertHTML = '<div class="alert alert-light col-6" role="alert" ' +
     'id="alertbox">&nbsp;</div>'
 ContactMap.prototype.cmHTML = '<div class="row"><div class="col-12"><div id="contactMaps"></div></div>';
 ContactMap.prototype.tooltipHTML = '<div id="tooltip" class="hidden">' +
-    '<p><span id="value"></p>' +
-    '</div></div>';
+    '<p><span id="value"></p>' + '</div></div>';
 
 ContactMap.prototype.ccellSize = 1; // calculated cell size for public use
 
@@ -436,16 +467,18 @@ ContactMap.prototype._draw = function () {
 
     this._addSequences(view, cellSize);
 
+    const colors = this.visualProperties.colors
     this._createCMap(this.data1, 'cmap1', view, cellSize, function (d) {
-        return '#007bff';
+        return colors.cmap1;
     });
 
     this._createCMap(this.data2, 'cmap2', view, cellSize, function (d) {
-        return '#ffc107';
+        return colors.cmap2;
     });
 
     this._createCMap(datasum, 'cmapsum', view, cellSize, function (d) {
-        return (d.value > 0) ? '#D50000' : '#28a745';
+        // return (d.value > 0) ? '#D50000' : '#28a745';
+        return (d.value > 0) ? colors.positiveDiff : colors.negativeDiff;
     });
 
     var hlights = view.append('g').attr('id', 'hlights');
@@ -472,6 +505,8 @@ ContactMap.prototype._draw = function () {
     function slided(d) {
         zoom.scaleTo(svg, d3.select(this).property('value'));
     }
+    svg.call(zoom).on('wheel.zoom', null)	
+        .on('dblclick.zoom', null);
 };
 
 
