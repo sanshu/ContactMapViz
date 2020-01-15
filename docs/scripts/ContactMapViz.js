@@ -15,7 +15,7 @@ ContactMap.prototype._defaultVisualProperties = {
         cmapText1: 'white', // button text
         cmap2: '#ffc107',
         cmapText2: 'black', // button text
-        positiveDiff: 'dc3545',
+        positiveDiff: '#dc3545',
         negativeDiff: 'green',
         cmapTextDiff: 'white', // button text
     }
@@ -35,7 +35,7 @@ ContactMap.prototype.setVisualProps = function (newProps) {
 
     function applyBtnColor(id, color, textColor){
         const style='color:'+textColor+';background-color:'+color+';border-color:' +color;
-        d3.select("#"+id)
+        d3.select('#'+id)
         .attr('style', style);
     }
 }
