@@ -9,7 +9,7 @@
     "babel-register": "^6.26.0",
     "browser-sync": "^2.26.12",
     "del": "^5.1.0",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.2",
     "gulp-autoprefixer": "^7.0.1",
     "gulp-babel": "^8.0.0",
     "gulp-cache": "^1.1.3",
